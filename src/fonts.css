@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'SWITCH COMMERCE BOLD';
+  src: url('/fonts/SWITCHCOMMERCEBOLD.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SWITCH COMMERCE REG';
+  src: url('/fonts/SWITCHCOMMERCEREG.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-sc-bold,
+.font-sc-reg {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
