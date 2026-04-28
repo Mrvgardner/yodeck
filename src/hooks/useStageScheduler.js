@@ -25,6 +25,13 @@ const DWELL = {
   quote:       30_000,
 }
 
+// Hard cap on simultaneous instances of a kind. Most kinds default to
+// "unlimited" (`Infinity`); YouTube is capped at 1 so two videos never play
+// at once (audio collisions + visual fight for attention).
+const MAX_CONCURRENT = {
+  youtube: 1,
+}
+
 // Per-kind preferred sizes, in order of preference for normal placement.
 // When the stage needs a big card (no live ≥2-cell card), these get sorted
 // by area descending and ties shuffled — so 2x1 vs 1x2 split roughly evenly.
@@ -150,13 +157,20 @@ export function useStageScheduler({ deck }) {
       // its predecessor is still falling out.
       const onScreenIds   = new Set()
       const onScreenKinds = new Set()
+      const kindCounts    = new Map()  // kind → live+exiting count
       let bigOnScreen = false
       for (const p of Object.values(current)) {
         if (p.state === 'live' || p.state === 'exiting') {
           onScreenIds.add(p.card._id)
           onScreenKinds.add(p.card.kind)
+          kindCounts.set(p.card.kind, (kindCounts.get(p.card.kind) || 0) + 1)
           if (p.w > 1 || p.h > 1) bigOnScreen = true
         }
+      }
+      // Hard concurrency caps — applied across all relaxation passes.
+      const isCapped = (kind) => {
+        const cap = MAX_CONCURRENT[kind] ?? Infinity
+        return (kindCounts.get(kind) || 0) >= cap
       }
       // Layout rule: at least one card on screen must span ≥ 2 cells. 8 small
       // cards is too dense to read at kitchen distance. When no big card is
@@ -184,12 +198,12 @@ export function useStageScheduler({ deck }) {
       // Pass 2 — relax kind-hot rule (same kind allowed if cooled).
       // Pass 3 — fallback: only "not on screen" + "not just evicted".
       // Pass 4 — last resort: only "not currently on screen".
-      const baseFilter = (c) => !onScreenIds.has(c._id) && !isRecentlyEvicted(c._id)
+      const baseFilter = (c) => !onScreenIds.has(c._id) && !isRecentlyEvicted(c._id) && !isCapped(c.kind)
       const passes = [
         deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind) && !isKindHot(c.kind)),
         deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind)),
         deckNow.filter(c => baseFilter(c)),
-        deckNow.filter(c => !onScreenIds.has(c._id)),
+        deckNow.filter(c => !onScreenIds.has(c._id) && !isCapped(c.kind)),
       ]
 
       for (const pool of passes) {
