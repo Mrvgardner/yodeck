@@ -1,58 +1,15 @@
-// Mock data for the kitchen signage feed.
-// Replace each section with live API/RSS pulls as they come online.
-// Keep the shape stable — every card type is an object { kind, ...payload, dwellMs }.
-
-const today = new Date()
-const yyyy = today.getFullYear()
-const mm = String(today.getMonth() + 1).padStart(2, '0')
-const dd = String(today.getDate()).padStart(2, '0')
-
-// Birthdays — wire to BambooHR / celebrations.generated.js feed when ready.
-export const birthdays = [
-  { kind: 'birthday', name: 'Maria Alvarez',    role: 'Operations',         date: `${yyyy}-${mm}-${dd}`, initials: 'MA' },
-  { kind: 'birthday', name: 'Devon Thompson',   role: 'Engineering',        date: `${yyyy}-${mm}-${dd}`, initials: 'DT' },
-  { kind: 'birthday', name: 'Priya Raman',      role: 'Customer Success',   date: `${yyyy}-${mm}-${dd}`, initials: 'PR' },
-]
-
-// Anniversaries
-export const anniversaries = [
-  { kind: 'anniversary', name: 'Cathy Cranford',  role: 'Marketing',     years: 7,  initials: 'CC' },
-  { kind: 'anniversary', name: 'Susie Velasquez', role: 'Accounting',    years: 12, initials: 'SV' },
-  { kind: 'anniversary', name: 'James Okoro',     role: 'Field Tech',    years: 3,  initials: 'JO' },
-]
-
-// Holidays — replace with iCal pull from staff calendar
-export const holidays = [
-  { kind: 'holiday', name: 'Memorial Day',      date: `${yyyy}-05-26`, blurb: 'Office closed' },
-  { kind: 'holiday', name: 'Independence Day',  date: `${yyyy}-07-04`, blurb: 'Office closed' },
-  { kind: 'holiday', name: 'Labor Day',         date: `${yyyy}-09-01`, blurb: 'Office closed' },
-  { kind: 'holiday', name: 'Thanksgiving',      date: `${yyyy}-11-27`, blurb: 'Thurs + Fri off' },
-]
-
-// Field notes — wire to switchcommerce.team RSS or internal API
-export const fieldNotes = [
-  {
-    kind: 'fieldnote',
-    title: 'New ATM deployment in West Texas',
-    author: 'Operations',
-    snippet: '34 units delivered ahead of schedule. Field tech roundtable Friday at 2 PM in the south conference room.',
-    timestamp: 'Today',
-  },
-  {
-    kind: 'fieldnote',
-    title: 'Q-pay v3 rollout cleared regression',
-    author: 'Engineering',
-    snippet: 'All four pilot merchants are live. Watch the dashboard for spike alerts and ping #qpay-rollout.',
-    timestamp: '2h ago',
-  },
-  {
-    kind: 'fieldnote',
-    title: 'Welcome new hire — Lena Park (Compliance)',
-    author: 'People Ops',
-    snippet: 'Starts Monday on the 4th floor. Stop by and say hello — she comes from First National.',
-    timestamp: 'Yesterday',
-  },
-]
+// Author-controlled content for the kitchen signage feed.
+//
+// IMPORTANT: nothing in this file should fabricate people, events, or
+// announcements. Birthdays / anniversaries / holidays / who's-out come from
+// BambooHR (live), and field notes come from switchcommerce.team (live).
+// If a feed fails, the kitchen TV simply shows fewer cards — never made-up
+// placeholders.
+//
+// What lives here:
+//   - youtubeFeeds: a curated list of SFW video IDs (verified at runtime)
+//   - quotes:       brand-approved one-liners that aren't tied to specific
+//                   people or events
 
 // Curated YouTube embeds — safe-for-work, embeddable, low-attention-grab.
 // Each card is validated at runtime via /api/youtube-check (server-side
@@ -67,9 +24,11 @@ export const youtubeFeeds = [
   { kind: 'youtube', videoId: '92IaqdAkYO0', title: 'Zelda: Breath of the Wild · Chill Stream' },
 ]
 
-// Quotes / pull-out cards keep the rotation interesting between data cards.
+// Pull-out quote cards — empty by default to avoid putting words in
+// anyone's mouth. Populate with real Switch Commerce quotes, mantras,
+// or values that you've explicitly approved for kitchen display.
+//
+// Format: { kind: 'quote', text: '...', attribution: '...' }
 export const quotes = [
-  { kind: 'quote', text: 'Move fast. Get it right.',         attribution: 'Switch Commerce' },
-  { kind: 'quote', text: 'The kitchen is for ideas too.',    attribution: '—' },
-  { kind: 'quote', text: 'Take the long view on every call.', attribution: 'Field manual' },
+  // { kind: 'quote', text: 'Real quote here.', attribution: 'Real source' },
 ]

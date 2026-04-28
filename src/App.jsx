@@ -9,7 +9,10 @@ import { useNews }          from './hooks/useNews.js'
 import { useFeeds }         from './hooks/useFeeds.js'
 import { useFieldNotes }    from './hooks/useFieldNotes.js'
 import { useNightlyReload } from './hooks/useNightlyReload.js'
-import { fieldNotes as fallbackFieldNotes, youtubeFeeds, quotes } from './data/mock.js'
+// Quotes + curated YouTube list are author-controlled mock content.
+// Field notes and BambooHR data come from live feeds only — never fall back
+// to invented examples, or the kitchen TV would show fake people/events.
+import { youtubeFeeds, quotes } from './data/mock.js'
 import { FAKE_HEADLINES } from './data/headlines.js'
 
 function shuffle(arr) {
@@ -84,8 +87,9 @@ export default function App() {
   const weather     = useWeather()
   const news        = useNews()
   const liveFeeds   = useFeeds()       // refreshes hourly from /api/feeds
-  const liveFNotes  = useFieldNotes()  // refreshes every 10 min from /api/field-notes
-  const fieldNotes  = liveFNotes.length > 0 ? liveFNotes : fallbackFieldNotes
+  // Field notes are live-only — if the feed fails or is empty, we show
+  // nothing rather than invented placeholder posts.
+  const fieldNotes  = useFieldNotes()  // refreshes every 10 min from /api/field-notes
 
   const birthdays     = useMemo(() => celebrationsInWindow(liveFeeds.birthdays, 7),                     [liveFeeds.birthdays])
   const anniversaries = useMemo(() => withYears(celebrationsInWindow(liveFeeds.anniversaries, 7)),      [liveFeeds.anniversaries])
