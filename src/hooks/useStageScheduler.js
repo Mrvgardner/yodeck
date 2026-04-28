@@ -204,14 +204,16 @@ export function useStageScheduler({ deck }) {
             const jitter = 0.85 + Math.random() * 0.3
             const expiresAt = now + dwell * jitter
 
-            setPlacements(prev => ({
-              ...prev,
-              [id]: {
-                id, card,
-                x: rect.x, y: rect.y, w: rect.w, h: rect.h,
-                state: 'live', expiresAt,
-              },
-            }))
+            const placement = {
+              id, card,
+              x: rect.x, y: rect.y, w: rect.w, h: rect.h,
+              state: 'live', expiresAt,
+            }
+            // Critical: update the ref SYNCHRONOUSLY so a back-to-back
+            // tryPlaceOne() in the same tick sees this card occupying its
+            // cells. Without this, two placements per tick can collide.
+            placementsRef.current = { ...placementsRef.current, [id]: placement }
+            setPlacements(placementsRef.current)
             // Mark this kind as "recently shown" so the soft kind cooldown kicks in.
             recentKindRef.current.set(card.kind, now + KIND_COOLDOWN)
             placed = true

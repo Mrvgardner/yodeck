@@ -5,7 +5,7 @@ import Stage       from './components/Stage.jsx'
 import Ticker      from './components/Ticker.jsx'
 import { useStageScheduler, buildDeck } from './hooks/useStageScheduler.js'
 import { useWeather }       from './hooks/useWeather.js'
-import { useHackerNews }    from './hooks/useHackerNews.js'
+import { useNews }          from './hooks/useNews.js'
 import { useFeeds }         from './hooks/useFeeds.js'
 import { useFieldNotes }    from './hooks/useFieldNotes.js'
 import { useNightlyReload } from './hooks/useNightlyReload.js'
@@ -82,7 +82,7 @@ export default function App() {
   useNightlyReload({ hour: 7, minute: 30 })
 
   const weather     = useWeather()
-  const news        = useHackerNews(10)
+  const news        = useNews()
   const liveFeeds   = useFeeds()       // refreshes hourly from /api/feeds
   const liveFNotes  = useFieldNotes()  // refreshes every 10 min from /api/field-notes
   const fieldNotes  = liveFNotes.length > 0 ? liveFNotes : fallbackFieldNotes
