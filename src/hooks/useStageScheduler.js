@@ -25,17 +25,19 @@ const DWELL = {
   quote:       30_000,
 }
 
-// Per-kind preferred sizes, in order of preference. Largest fitting size wins.
+// Per-kind preferred sizes, in order of preference for normal placement.
+// When the stage needs a big card (no live ≥2-cell card), these get sorted
+// by area descending and ties shuffled — so 2x1 vs 1x2 split roughly evenly.
 const SIZE_PREFS = {
-  birthday:    [[1,1], [2,1]],
-  anniversary: [[1,1], [2,1]],
-  holiday:     [[1,1], [2,1]],
-  whosout:     [[1,1], [2,1]],
+  birthday:    [[1,1], [2,1], [1,2]],
+  anniversary: [[1,1], [2,1], [1,2]],
+  holiday:     [[1,1], [2,1], [1,2]],
+  whosout:     [[1,1], [2,1], [1,2]],
   fieldnote:   [[2,1], [1,2], [1,1]],
-  weather:     [[1,1], [2,1]],
-  news:        [[2,1], [1,1]],
-  youtube:     [[2,2], [2,1]],
-  quote:       [[2,1], [1,1]],
+  weather:     [[1,1], [2,1], [1,2]],
+  news:        [[2,1], [1,2], [1,1]],
+  youtube:     [[2,2], [2,1]],   // videos are landscape, no 1x2
+  quote:       [[2,1], [1,2], [1,1]],
 }
 
 const EXIT_MS         = 1500     // ~Card.jsx exit transition + buffer
@@ -195,11 +197,15 @@ export function useStageScheduler({ deck }) {
           const skip = skipUntilRef.current.get(card._id)
           if (skip && skip > now) continue
 
-          // When stage needs a big card, prefer big sizes for this kind.
-          // We sort the kind's allowed sizes so cells > 1 come first.
+          // When stage needs a big card, sort sizes by area descending — and
+          // randomize equal-area ties so 2x1 vs 1x2 split roughly evenly
+          // (otherwise insertion order always wins and we never see tall cards).
           const baseSizes = SIZE_PREFS[card.kind] || [[1,1]]
           const sizes = needBig
-            ? [...baseSizes].sort((a, b) => (b[0] * b[1]) - (a[0] * a[1]))
+            ? [...baseSizes].sort((a, b) => {
+                const diff = (b[0] * b[1]) - (a[0] * a[1])
+                return diff !== 0 ? diff : (Math.random() < 0.5 ? -1 : 1)
+              })
             : baseSizes
           let placed = false
           for (const [w, h] of sizes) {

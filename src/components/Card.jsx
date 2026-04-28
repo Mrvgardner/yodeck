@@ -27,7 +27,7 @@ const dropIn = {
   },
 }
 
-export default function Card({ children, className = '', surface = 'glass', padding = 'p-10' }) {
+export default function Card({ children, className = '', surface = 'glass', padding = 'p-14' }) {
   const surfaceClass = {
     glass:  'card-surface text-sc-cream',
     amber:  'card-surface-amber text-white',
