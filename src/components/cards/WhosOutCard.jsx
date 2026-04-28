@@ -16,36 +16,36 @@ export default function WhosOutCard({ data }) {
           <span className="font-mono text-xl tracking-widest text-sc-amber">
             ✈ WHO'S OUT
           </span>
-          <span className="font-mono text-xl text-sc-cream/60 tracking-wider">
+          <span className="font-mono text-xl text-sc-cream/65 tracking-wider">
             {fmtRange(data.startDate, data.endDate)}
           </span>
         </div>
 
-        <div className="flex items-end gap-6">
+        <div className="flex items-center gap-5">
           <div
-            className="flex h-[120px] w-[120px] items-center justify-center rounded-2xl bg-sc-amber/15 font-display text-6xl text-sc-amber ring-1 ring-sc-amber/40"
+            className="flex h-[100px] w-[100px] flex-shrink-0 items-center justify-center rounded-2xl bg-sc-amber/15 font-display text-5xl text-sc-amber ring-1 ring-sc-amber/40"
             aria-hidden
           >
             {data.initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-display text-6xl leading-tight truncate text-sc-cream">
+            <div className="font-display text-5xl leading-[0.95] break-words text-sc-cream">
               {data.name}
             </div>
-            <div className="font-mono text-2xl text-sc-cream/60 mt-2">
+            <div className="font-mono text-lg text-sc-cream/60 mt-2 tracking-wider">
               OUT OF OFFICE
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-sc-cream/10 pt-5">
+        <div className="flex items-end justify-between border-t border-sc-cream/15 pt-5">
           <span className="font-display text-5xl text-sc-orange leading-none">
             {data.days ?? '—'}
-            <span className="font-mono text-xl text-sc-cream/60 ml-3 tracking-wider align-middle">
+            <span className="font-mono text-lg text-sc-cream/65 ml-3 tracking-wider align-middle">
               DAY{data.days === 1 ? '' : 'S'}
             </span>
           </span>
-          <span className="font-mono text-xl text-sc-cream/40 tracking-wider">
+          <span className="font-mono text-base text-sc-cream/40 tracking-wider">
             BAMBOO HR
           </span>
         </div>

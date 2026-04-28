@@ -35,8 +35,10 @@ const SIZE_PREFS = {
   quote:       [[2,1], [1,1]],
 }
 
-const EXIT_MS = 1500       // ~Card.jsx exit transition + buffer
-const TICK_MS = 500        // scheduler poll cadence
+const EXIT_MS         = 1500     // ~Card.jsx exit transition + buffer
+const TICK_MS         = 500      // scheduler poll cadence
+const RECENT_COOLDOWN = 90_000   // a card just removed can't reappear for this long
+const KIND_COOLDOWN   = 12_000   // same kind can't reappear too quickly either
 
 function shuffle(arr) {
   const a = arr.slice()
@@ -120,11 +122,13 @@ export function useStageScheduler({ deck }) {
 
   // Refs so async tick logic always sees the freshest values without
   // re-creating the interval on every render.
-  const placementsRef = useRef(placements)
-  const deckRef       = useRef(deck)
-  const placingRef    = useRef(false)
-  const skipUntilRef  = useRef(new Map())  // _id → epoch ms cooldown
-  const placementSeq  = useRef(0)
+  const placementsRef     = useRef(placements)
+  const deckRef           = useRef(deck)
+  const placingRef        = useRef(false)
+  const skipUntilRef      = useRef(new Map())  // _id   → epoch ms (preload-failure cooldown)
+  const recentEvictedRef  = useRef(new Map())  // _id   → epoch ms (just-evicted cooldown)
+  const recentKindRef     = useRef(new Map())  // kind  → epoch ms (kind-just-shown cooldown)
+  const placementSeq      = useRef(0)
 
   useEffect(() => { placementsRef.current = placements }, [placements])
   useEffect(() => { deckRef.current       = deck       }, [deck])
@@ -137,10 +141,12 @@ export function useStageScheduler({ deck }) {
       const occ = computeOcc(current)
       if (!hasVacancy(occ)) return false
 
+      // On-screen set INCLUDES exiting cards — a card can't reappear while
+      // its predecessor is still falling out.
       const onScreenIds   = new Set()
       const onScreenKinds = new Set()
       for (const p of Object.values(current)) {
-        if (p.state === 'live') {
+        if (p.state === 'live' || p.state === 'exiting') {
           onScreenIds.add(p.card._id)
           onScreenKinds.add(p.card.kind)
         }
@@ -149,10 +155,28 @@ export function useStageScheduler({ deck }) {
       const deckNow = deckRef.current
       const now = Date.now()
 
-      // Pass 1: prefer kinds NOT currently on screen (variety)
-      // Pass 2: any non-duplicate (so the stage doesn't go empty if one kind dominates)
+      // Recently-evicted cards (90s cooldown) — prevents a card from
+      // immediately replacing itself when it falls away.
+      const isRecentlyEvicted = (id) => {
+        const t = recentEvictedRef.current.get(id)
+        return t && t > now
+      }
+      // Same kind shown very recently (12s) → soft skip in pass 1, allowed in later passes.
+      const isKindHot = (kind) => {
+        const t = recentKindRef.current.get(kind)
+        return t && t > now
+      }
+
+      // Pass 1 — strictest: not on screen, not same kind currently shown,
+      //                     not the kind we just showed, not recently evicted.
+      // Pass 2 — relax kind-hot rule (same kind allowed if cooled).
+      // Pass 3 — fallback: only "not on screen" + "not just evicted".
+      // Pass 4 — last resort: only "not currently on screen".
+      const baseFilter = (c) => !onScreenIds.has(c._id) && !isRecentlyEvicted(c._id)
       const passes = [
-        deckNow.filter(c => !onScreenIds.has(c._id) && !onScreenKinds.has(c.kind)),
+        deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind) && !isKindHot(c.kind)),
+        deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind)),
+        deckNow.filter(c => baseFilter(c)),
         deckNow.filter(c => !onScreenIds.has(c._id)),
       ]
 
@@ -188,6 +212,8 @@ export function useStageScheduler({ deck }) {
                 state: 'live', expiresAt,
               },
             }))
+            // Mark this kind as "recently shown" so the soft kind cooldown kicks in.
+            recentKindRef.current.set(card.kind, now + KIND_COOLDOWN)
             placed = true
             return true
           }
@@ -222,9 +248,14 @@ export function useStageScheduler({ deck }) {
       for (const [id, p] of Object.entries(next)) {
         if (p.state === 'exiting' && p.exitedAt + EXIT_MS <= now) {
           if (next === cur) { next = { ...cur }; mutated = true }
+          // Remember we just removed this card so it can't immediately reappear.
+          recentEvictedRef.current.set(p.card._id, now + RECENT_COOLDOWN)
           delete next[id]
         }
       }
+      // Garbage-collect old cooldown entries so the maps don't grow unbounded.
+      for (const [k, t] of recentEvictedRef.current) if (t <= now) recentEvictedRef.current.delete(k)
+      for (const [k, t] of recentKindRef.current)    if (t <= now) recentKindRef.current.delete(k)
       if (mutated) {
         setPlacements(next)
         placementsRef.current = next  // update ref synchronously so tryPlaceOne sees it
