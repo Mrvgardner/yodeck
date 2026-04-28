@@ -10,16 +10,19 @@ import { preloadCard } from '../utils/preload.js'
 export const COLS = 4
 export const ROWS = 2
 
+// Dwell times tuned for kitchen TV reading distance. Values pad enough
+// time for someone walking past to digest the card without it feeling stale
+// to someone standing nearby.
 const DWELL = {
-  birthday:    24_000,
-  anniversary: 24_000,
-  holiday:     22_000,
-  whosout:     22_000,
-  fieldnote:   30_000,
-  weather:     26_000,
-  news:        24_000,
-  youtube:     60_000,
-  quote:       20_000,
+  birthday:    35_000,
+  anniversary: 35_000,
+  holiday:     32_000,
+  whosout:     32_000,
+  fieldnote:   45_000,   // longer body copy = more reading time
+  weather:     38_000,
+  news:        42_000,   // headline + description = more to absorb
+  youtube:     150_000,  // 2½ min — long enough to actually enjoy
+  quote:       30_000,
 }
 
 // Per-kind preferred sizes, in order of preference. Largest fitting size wins.
@@ -145,12 +148,19 @@ export function useStageScheduler({ deck }) {
       // its predecessor is still falling out.
       const onScreenIds   = new Set()
       const onScreenKinds = new Set()
+      let bigOnScreen = false
       for (const p of Object.values(current)) {
         if (p.state === 'live' || p.state === 'exiting') {
           onScreenIds.add(p.card._id)
           onScreenKinds.add(p.card.kind)
+          if (p.w > 1 || p.h > 1) bigOnScreen = true
         }
       }
+      // Layout rule: at least one card on screen must span ≥ 2 cells. 8 small
+      // cards is too dense to read at kitchen distance. When no big card is
+      // present, we flip the size preferences so the next placement strongly
+      // prefers a 2-cell-or-larger size.
+      const needBig = !bigOnScreen
 
       const deckNow = deckRef.current
       const now = Date.now()
@@ -185,7 +195,12 @@ export function useStageScheduler({ deck }) {
           const skip = skipUntilRef.current.get(card._id)
           if (skip && skip > now) continue
 
-          const sizes = SIZE_PREFS[card.kind] || [[1,1]]
+          // When stage needs a big card, prefer big sizes for this kind.
+          // We sort the kind's allowed sizes so cells > 1 come first.
+          const baseSizes = SIZE_PREFS[card.kind] || [[1,1]]
+          const sizes = needBig
+            ? [...baseSizes].sort((a, b) => (b[0] * b[1]) - (a[0] * a[1]))
+            : baseSizes
           let placed = false
           for (const [w, h] of sizes) {
             const rects = findFreeRects(occ, w, h)

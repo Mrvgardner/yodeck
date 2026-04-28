@@ -55,19 +55,16 @@ export const fieldNotes = [
 ]
 
 // Curated YouTube embeds — safe-for-work, embeddable, low-attention-grab.
-// Empty by default. Add IDs as you find videos worth showing in the kitchen.
-//
 // Each card is validated at runtime via /api/youtube-check (server-side
 // oEmbed). Videos that aren't currently embeddable — owner-disabled embeds,
 // removed, processing, age-restricted — are skipped automatically.
 //
-// Tip: prefer ambient / timelapse / instrumental music videos from
-// channels with a long publishing history (less likely to vanish overnight).
-//
 // Format: { kind: 'youtube', videoId: 'XXXXXXXXXXX', title: 'Description' }
 export const youtubeFeeds = [
-  // Example (uncomment and replace ID after verifying it plays in an iframe):
-  // { kind: 'youtube', videoId: 'aqz-KE-bpKQ', title: 'Big Buck Bunny (open content)' },
+  { kind: 'youtube', videoId: 'SUXPnIEpbn4', title: 'Panda Cam · Chengdu Panda Base' },
+  { kind: 'youtube', videoId: 'B4-L2nfGcuE', title: 'Big Bear Bald Eagle Nest · Live' },
+  { kind: 'youtube', videoId: 'Zl_gKWFrgpA', title: 'Live Webcams Around the World' },
+  { kind: 'youtube', videoId: '92IaqdAkYO0', title: 'Zelda: Breath of the Wild · Chill Stream' },
 ]
 
 // Quotes / pull-out cards keep the rotation interesting between data cards.
