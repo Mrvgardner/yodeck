@@ -1,16 +1,20 @@
 import Card from '../Card.jsx'
+import { scaleOf, pickByLen } from '../../utils/cardSize.js'
 
-function titleSize(title) {
-  const len = title?.length || 0
-  if (len <= 25)  return 'text-4xl leading-[1.0]'
-  if (len <= 50)  return 'text-3xl leading-[1.1]'
-  if (len <= 90)  return 'text-2xl leading-[1.2]'
-  if (len <= 140) return 'text-xl leading-[1.25]'
-  return 'text-lg leading-[1.3]'
-}
+const TITLE_BANDS = [25, 50, 90, 140]
+const TITLE_TIERS = [
+  ['text-4xl leading-[1.0]',  'text-6xl leading-[0.95]', 'text-8xl leading-[0.95]'],
+  ['text-3xl leading-[1.1]',  'text-5xl leading-[1.0]',  'text-7xl leading-[1.0]'],
+  ['text-2xl leading-[1.2]',  'text-4xl leading-[1.05]', 'text-6xl leading-[1.05]'],
+  ['text-xl  leading-[1.25]', 'text-3xl leading-[1.1]',  'text-5xl leading-[1.1]'],
+  ['text-lg  leading-[1.3]',  'text-2xl leading-[1.15]', 'text-4xl leading-[1.15]'],
+]
+const SNIPPET_BY_SCALE = ['text-base', 'text-xl', 'text-2xl']
+const CLAMP_BY_SCALE   = ['line-clamp-3', 'line-clamp-4', 'line-clamp-6']
 
-export default function FieldNoteCard({ data }) {
-  const tCls = titleSize(data.title)
+export default function FieldNoteCard({ data, size }) {
+  const scale = scaleOf(size)
+  const tCls  = pickByLen(data.title, scale, TITLE_BANDS, TITLE_TIERS)
   return (
     <Card surface="glass">
       <div className="flex flex-col h-full gap-4">
@@ -27,7 +31,7 @@ export default function FieldNoteCard({ data }) {
           <div className={`font-display text-sc-cream break-words ${tCls}`}>
             {data.title}
           </div>
-          <p className="font-body text-base text-sc-cream/80 mt-3 leading-snug line-clamp-3">
+          <p className={`font-body ${SNIPPET_BY_SCALE[scale]} text-sc-cream/80 mt-3 leading-snug ${CLAMP_BY_SCALE[scale]}`}>
             {data.snippet}
           </p>
         </main>

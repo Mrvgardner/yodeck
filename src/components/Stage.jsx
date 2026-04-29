@@ -15,19 +15,22 @@ import { COLS, ROWS }  from '../hooks/useStageScheduler.js'
 // Memoized so a card never re-renders unless its data identity actually changes.
 // Big win for the YouTube card — without memo, every parent re-render would
 // remount the iframe.
-const CardFor = memo(function CardFor({ card }) {
+//
+// `size` is the cell footprint ({ w, h }) — every card uses it to pick text
+// and ornament sizes appropriate for the actual rendered area.
+const CardFor = memo(function CardFor({ card, size }) {
   if (!card) return null
   switch (card.kind) {
-    case 'birthday':    return <BirthdayCard    data={card} />
-    case 'anniversary': return <AnniversaryCard data={card} />
-    case 'holiday':     return <HolidayCard     data={card} />
-    case 'fieldnote':   return <FieldNoteCard   data={card} />
-    case 'weather':     return <WeatherCard     data={card} />
-    case 'news':        return <NewsCard        data={card} />
-    case 'youtube':     return <YouTubeCard     data={card} />
-    case 'quote':       return <QuoteCard       data={card} />
-    case 'whosout':     return <WhosOutCard     data={card} />
-    case 'movie':       return <MovieQuoteCard  data={card} />
+    case 'birthday':    return <BirthdayCard    data={card} size={size} />
+    case 'anniversary': return <AnniversaryCard data={card} size={size} />
+    case 'holiday':     return <HolidayCard     data={card} size={size} />
+    case 'fieldnote':   return <FieldNoteCard   data={card} size={size} />
+    case 'weather':     return <WeatherCard     data={card} size={size} />
+    case 'news':        return <NewsCard        data={card} size={size} />
+    case 'youtube':     return <YouTubeCard     data={card} size={size} />
+    case 'quote':       return <QuoteCard       data={card} size={size} />
+    case 'whosout':     return <WhosOutCard     data={card} size={size} />
+    case 'movie':       return <MovieQuoteCard  data={card} size={size} />
     default:            return null
   }
 })
@@ -55,7 +58,9 @@ export default function Stage({ placements }) {
             }}
           >
             <AnimatePresence>
-              {p.state === 'live' && <CardFor key={p.card._id} card={p.card} />}
+              {p.state === 'live' && (
+                <CardFor key={p.card._id} card={p.card} size={{ w: p.w, h: p.h }} />
+              )}
             </AnimatePresence>
           </div>
         ))}

@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react'
 import Card from '../Card.jsx'
+import { scaleOf, pickByLen } from '../../utils/cardSize.js'
 
-// Sized to fit cleanly even in a 1x1 cell at TV resolution.
-// Larger cards (2x1, 1x2) just give the text more breathing room.
-function quoteSize(text) {
-  const len = text?.length || 0
-  if (len <= 25)  return 'text-4xl leading-[1.0]'
-  if (len <= 50)  return 'text-3xl leading-[1.1]'
-  if (len <= 90)  return 'text-2xl leading-[1.2]'
-  if (len <= 140) return 'text-xl leading-[1.25]'
-  return 'text-lg leading-[1.3]'
-}
+const QUOTE_BANDS = [25, 50, 90, 140]
+const QUOTE_TIERS = [
+  ['text-4xl leading-[1.0]',  'text-6xl leading-[0.95]', 'text-8xl leading-[0.95]'],
+  ['text-3xl leading-[1.1]',  'text-5xl leading-[1.0]',  'text-7xl leading-[1.0]'],
+  ['text-2xl leading-[1.2]',  'text-4xl leading-[1.05]', 'text-6xl leading-[1.05]'],
+  ['text-xl  leading-[1.25]', 'text-3xl leading-[1.1]',  'text-5xl leading-[1.1]'],
+  ['text-lg  leading-[1.3]',  'text-2xl leading-[1.15]', 'text-4xl leading-[1.15]'],
+]
+const GLYPH_BY_SCALE     = ['text-3xl',         'text-5xl',         'text-7xl']
+const CHARACTER_BY_SCALE = ['text-2xl',         'text-3xl',         'text-5xl']
 
 const HIDDEN_MS = 25_000
 const FADE_MS   = 1_200
 
-export default function MovieQuoteCard({ data }) {
-  const tCls = quoteSize(data.text)
-  const gold = 'text-[#d4a560]'
+export default function MovieQuoteCard({ data, size }) {
+  const scale = scaleOf(size)
+  const tCls  = pickByLen(data.text, scale, QUOTE_BANDS, QUOTE_TIERS)
+  const gold  = 'text-[#d4a560]'
   const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
@@ -39,13 +41,12 @@ export default function MovieQuoteCard({ data }) {
         </header>
 
         <main className="flex-1 min-h-0 overflow-hidden flex flex-col justify-center">
-          <span className={`font-display ${gold} text-3xl leading-none mb-1`} aria-hidden>“</span>
+          <span className={`font-display ${gold} ${GLYPH_BY_SCALE[scale]} leading-none mb-1`} aria-hidden>“</span>
           <div className={`font-display text-sc-cream break-words ${tCls}`}>
             {data.text}
           </div>
         </main>
 
-        {/* Footer holds layout — opacity flips on reveal so it never shifts */}
         <footer
           className="flex-shrink-0 flex items-center justify-between gap-4 border-t pt-4 transition-all ease-out"
           style={{
@@ -54,7 +55,7 @@ export default function MovieQuoteCard({ data }) {
             transitionDuration: `${FADE_MS}ms`,
           }}
         >
-          <span className="font-display text-2xl text-sc-cream/95 truncate min-w-0">
+          <span className={`font-display ${CHARACTER_BY_SCALE[scale]} text-sc-cream/95 truncate min-w-0`}>
             {data.character || ' '}
           </span>
           <span className={`font-mono text-base ${gold} tracking-wider truncate flex-shrink-0 max-w-[45%] text-right`}>
@@ -63,8 +64,7 @@ export default function MovieQuoteCard({ data }) {
         </footer>
       </div>
 
-      {/* Countdown bar — fills over the hidden window via CSS keyframe,
-          fades on reveal. Sits at the very bottom edge of the card. */}
+      {/* Countdown bar */}
       <div
         className="absolute left-0 right-0 bottom-0 h-[4px] overflow-hidden rounded-b-[28px]"
         aria-hidden

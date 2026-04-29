@@ -1,4 +1,5 @@
 import Card from '../Card.jsx'
+import { scaleOf } from '../../utils/cardSize.js'
 
 function glyphFor(code) {
   if (code == null) return '·'
@@ -11,35 +12,33 @@ function glyphFor(code) {
   if (code >= 95)   return '⚡'
   return '·'
 }
-
 function formatHour(iso) {
   const d = new Date(iso)
   return d.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }).replace(/\s/, ' ')
 }
-
-// Build a one-line summary from the hourly strip — e.g.:
-//   "Steady 60s · Light rain at 4 PM"
-//   "Warming through afternoon · Clear all evening"
 function summaryFor(hourly) {
   if (!hourly || hourly.length === 0) return ''
-  const temps  = hourly.map(h => h.tempF)
-  const min    = Math.min(...temps)
-  const max    = Math.max(...temps)
-  const range  = max - min
+  const temps = hourly.map(h => h.tempF)
+  const min   = Math.min(...temps)
+  const max   = Math.max(...temps)
+  const range = max - min
   const tempBit = range <= 3
     ? `Steady ${Math.round((min + max) / 2)}°`
     : `${min}° → ${max}°`
-  // Find first hour with rain/snow/storm
   const wet = hourly.find(h => h.code >= 51)
-  if (wet) {
-    return `${tempBit} · ${wet.condition} at ${formatHour(wet.time)}`
-  }
+  if (wet) return `${tempBit} · ${wet.condition} at ${formatHour(wet.time)}`
   return `${tempBit} · ${hourly[0].condition.toLowerCase()} ahead`
 }
 
-export default function WeatherCard({ data }) {
+const TIME_BY_SCALE  = ['text-xs',     'text-base',   'text-xl']
+const GLYPH_BY_SCALE = ['text-3xl',    'text-5xl',    'text-7xl']
+const TEMP_BY_SCALE  = ['text-2xl',    'text-4xl',    'text-6xl']
+const CELL_PAD       = ['py-2',        'py-4',        'py-6']
+
+export default function WeatherCard({ data, size }) {
   if (!data) return null
-  const hourly  = Array.isArray(data.hourly) ? data.hourly : []
+  const scale  = scaleOf(size)
+  const hourly = Array.isArray(data.hourly) ? data.hourly : []
   const summary = summaryFor(hourly)
 
   return (
@@ -54,21 +53,20 @@ export default function WeatherCard({ data }) {
           </span>
         </header>
 
-        {/* Main content = the forecast strip itself, taking the bulk of the card */}
         <main className="flex-1 min-h-0 overflow-hidden">
           <div className="grid grid-cols-6 gap-2 h-full">
             {hourly.map((h, i) => (
               <div
                 key={h.time + i}
-                className="flex flex-col items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10 px-1 py-2 min-h-0"
+                className={`flex flex-col items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10 px-1 ${CELL_PAD[scale]} min-h-0`}
               >
-                <span className="font-mono text-xs text-sc-cream/65 tracking-wider leading-tight">
+                <span className={`font-mono ${TIME_BY_SCALE[scale]} text-sc-cream/65 tracking-wider leading-tight`}>
                   {formatHour(h.time)}
                 </span>
-                <span className="text-3xl leading-none my-1" aria-hidden>
+                <span className={`${GLYPH_BY_SCALE[scale]} leading-none my-1`} aria-hidden>
                   {glyphFor(h.code)}
                 </span>
-                <span className="font-display text-2xl text-sc-cream leading-none">
+                <span className={`font-display ${TEMP_BY_SCALE[scale]} text-sc-cream leading-none`}>
                   {h.tempF}°
                 </span>
               </div>

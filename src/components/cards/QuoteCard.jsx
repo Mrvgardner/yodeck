@@ -1,17 +1,19 @@
 import Card from '../Card.jsx'
+import { scaleOf, pickByLen } from '../../utils/cardSize.js'
 
-function quoteSize(text) {
-  const len = text?.length || 0
-  if (len <= 25)  return 'text-5xl leading-[1.0]'
-  if (len <= 50)  return 'text-4xl leading-[1.05]'
-  if (len <= 80)  return 'text-3xl leading-[1.1]'
-  if (len <= 130) return 'text-2xl leading-[1.2]'
-  if (len <= 180) return 'text-xl leading-[1.25]'
-  return 'text-lg leading-[1.3]'
-}
+const QUOTE_BANDS = [25, 50, 80, 130, 180]
+const QUOTE_TIERS = [
+  ['text-5xl leading-[1.0]',  'text-7xl leading-[0.95]', 'text-9xl leading-[0.95]'],
+  ['text-4xl leading-[1.05]', 'text-6xl leading-[1.0]',  'text-8xl leading-[1.0]'],
+  ['text-3xl leading-[1.1]',  'text-5xl leading-[1.05]', 'text-7xl leading-[1.05]'],
+  ['text-2xl leading-[1.2]',  'text-4xl leading-[1.1]',  'text-6xl leading-[1.1]'],
+  ['text-xl  leading-[1.25]', 'text-3xl leading-[1.15]', 'text-5xl leading-[1.15]'],
+  ['text-lg  leading-[1.3]',  'text-2xl leading-[1.2]',  'text-4xl leading-[1.2]'],
+]
 
-export default function QuoteCard({ data }) {
-  const tCls = quoteSize(data.text)
+export default function QuoteCard({ data, size }) {
+  const scale = scaleOf(size)
+  const tCls  = pickByLen(data.text, scale, QUOTE_BANDS, QUOTE_TIERS)
   return (
     <Card surface="amber">
       <div className="flex flex-col h-full gap-4">
