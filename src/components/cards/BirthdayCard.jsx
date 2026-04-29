@@ -2,9 +2,9 @@ import Card from '../Card.jsx'
 
 function nameSize(name) {
   const len = name?.length || 0
-  if (len <= 14)  return 'text-5xl leading-[0.95]'
-  if (len <= 22)  return 'text-4xl leading-[1.0]'
-  return 'text-3xl leading-[1.05]'
+  if (len <= 12)  return 'text-4xl leading-[1.0]'
+  if (len <= 20)  return 'text-3xl leading-[1.05]'
+  return 'text-2xl leading-[1.1]'
 }
 
 export default function BirthdayCard({ data }) {
@@ -23,7 +23,7 @@ export default function BirthdayCard({ data }) {
 
         <main className="flex-1 min-h-0 overflow-hidden flex items-center gap-5">
           <div
-            className="flex h-[100px] w-[100px] flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 font-display text-5xl ring-1 ring-white/30"
+            className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 font-display text-3xl ring-1 ring-white/30"
             aria-hidden
           >
             {data.initials}
@@ -41,10 +41,10 @@ export default function BirthdayCard({ data }) {
         </main>
 
         <footer className="flex-shrink-0 flex items-center justify-between border-t border-white/25 pt-4">
-          <span className="font-display text-3xl text-white tracking-wide">
+          <span className="font-display text-2xl text-white tracking-wide">
             HAPPY BIRTHDAY
           </span>
-          <span className="font-display text-3xl text-white/95">🎂</span>
+          <span className="font-display text-2xl text-white/95">🎂</span>
         </footer>
       </div>
     </Card>

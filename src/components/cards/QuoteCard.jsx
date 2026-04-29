@@ -2,12 +2,12 @@ import Card from '../Card.jsx'
 
 function quoteSize(text) {
   const len = text?.length || 0
-  if (len <= 30)  return 'text-6xl leading-[0.95]'
-  if (len <= 55)  return 'text-5xl leading-[1.0]'
-  if (len <= 85)  return 'text-4xl leading-[1.05]'
-  if (len <= 130) return 'text-3xl leading-[1.1]'
-  if (len <= 180) return 'text-2xl leading-[1.15]'
-  return 'text-xl leading-[1.2]'
+  if (len <= 25)  return 'text-5xl leading-[1.0]'
+  if (len <= 50)  return 'text-4xl leading-[1.05]'
+  if (len <= 80)  return 'text-3xl leading-[1.1]'
+  if (len <= 130) return 'text-2xl leading-[1.2]'
+  if (len <= 180) return 'text-xl leading-[1.25]'
+  return 'text-lg leading-[1.3]'
 }
 
 export default function QuoteCard({ data }) {

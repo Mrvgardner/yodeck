@@ -10,9 +10,9 @@ function fmtRange(start, end) {
 
 function nameSize(name) {
   const len = name?.length || 0
-  if (len <= 14)  return 'text-5xl leading-[0.95]'
-  if (len <= 22)  return 'text-4xl leading-[1.0]'
-  return 'text-3xl leading-[1.05]'
+  if (len <= 12)  return 'text-4xl leading-[1.0]'
+  if (len <= 20)  return 'text-3xl leading-[1.05]'
+  return 'text-2xl leading-[1.1]'
 }
 
 export default function WhosOutCard({ data }) {
@@ -31,7 +31,7 @@ export default function WhosOutCard({ data }) {
 
         <main className="flex-1 min-h-0 overflow-hidden flex items-center gap-5">
           <div
-            className="flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center rounded-2xl bg-sc-amber/15 font-display text-4xl text-sc-amber ring-1 ring-sc-amber/40"
+            className="flex h-[64px] w-[64px] flex-shrink-0 items-center justify-center rounded-xl bg-sc-amber/15 font-display text-2xl text-sc-amber ring-1 ring-sc-amber/40"
             aria-hidden
           >
             {data.initials}
@@ -47,13 +47,13 @@ export default function WhosOutCard({ data }) {
         </main>
 
         <footer className="flex-shrink-0 flex items-end justify-between border-t border-sc-cream/15 pt-4">
-          <span className="font-display text-4xl text-sc-orange leading-none">
+          <span className="font-display text-3xl text-sc-orange leading-none">
             {data.days ?? '—'}
-            <span className="font-mono text-base text-sc-cream/65 ml-2 tracking-wider align-middle">
+            <span className="font-mono text-sm text-sc-cream/65 ml-2 tracking-wider align-middle">
               DAY{data.days === 1 ? '' : 'S'}
             </span>
           </span>
-          <span className="font-mono text-sm text-sc-cream/40 tracking-wider">
+          <span className="font-mono text-xs text-sc-cream/40 tracking-wider">
             BAMBOO HR
           </span>
         </footer>

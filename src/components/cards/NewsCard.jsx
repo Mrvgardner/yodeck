@@ -2,11 +2,11 @@ import Card from '../Card.jsx'
 
 function titleSize(title) {
   const len = title?.length || 0
-  if (len <= 35)  return 'text-5xl leading-[1.0]'
-  if (len <= 70)  return 'text-4xl leading-[1.05]'
-  if (len <= 110) return 'text-3xl leading-[1.1]'
-  if (len <= 160) return 'text-2xl leading-[1.15]'
-  return 'text-xl leading-[1.2]'
+  if (len <= 30)  return 'text-4xl leading-[1.05]'
+  if (len <= 60)  return 'text-3xl leading-[1.1]'
+  if (len <= 100) return 'text-2xl leading-[1.2]'
+  if (len <= 150) return 'text-xl leading-[1.25]'
+  return 'text-lg leading-[1.3]'
 }
 
 export default function NewsCard({ data }) {
@@ -28,7 +28,7 @@ export default function NewsCard({ data }) {
             {data.title}
           </div>
           {data.description && (
-            <p className="font-body text-lg text-sc-cream/75 mt-3 leading-snug line-clamp-3">
+            <p className="font-body text-base text-sc-cream/75 mt-3 leading-snug line-clamp-3">
               {data.description}
             </p>
           )}

@@ -2,9 +2,9 @@ import Card from '../Card.jsx'
 
 function nameSize(name) {
   const len = name?.length || 0
-  if (len <= 14)  return 'text-4xl leading-[0.95]'
-  if (len <= 22)  return 'text-3xl leading-[1.0]'
-  return 'text-2xl leading-[1.05]'
+  if (len <= 12)  return 'text-3xl leading-[1.0]'
+  if (len <= 20)  return 'text-2xl leading-[1.05]'
+  return 'text-xl leading-[1.1]'
 }
 
 export default function AnniversaryCard({ data }) {
@@ -20,11 +20,11 @@ export default function AnniversaryCard({ data }) {
         </header>
 
         <main className="flex-1 min-h-0 overflow-hidden flex flex-col justify-center">
-          <div className="flex items-baseline gap-5">
-            <div className="font-display text-[9rem] leading-[0.8] text-sc-orange">
+          <div className="flex items-baseline gap-4">
+            <div className="font-display text-[6rem] leading-[0.8] text-sc-orange">
               {data.years}
             </div>
-            <div className="font-display text-3xl text-sc-cream/90 leading-tight">
+            <div className="font-display text-2xl text-sc-cream/90 leading-tight">
               YEARS<br />STRONG
             </div>
           </div>
@@ -32,7 +32,7 @@ export default function AnniversaryCard({ data }) {
 
         <footer className="flex-shrink-0 flex items-center gap-4 border-t border-sc-cream/15 pt-4">
           <div
-            className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-xl bg-sc-orange/15 font-display text-3xl text-sc-orange ring-1 ring-sc-orange/40"
+            className="flex h-[56px] w-[56px] flex-shrink-0 items-center justify-center rounded-xl bg-sc-orange/15 font-display text-2xl text-sc-orange ring-1 ring-sc-orange/40"
             aria-hidden
           >
             {data.initials}

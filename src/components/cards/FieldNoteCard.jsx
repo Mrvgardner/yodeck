@@ -2,11 +2,11 @@ import Card from '../Card.jsx'
 
 function titleSize(title) {
   const len = title?.length || 0
-  if (len <= 30)  return 'text-5xl leading-[1.0]'
-  if (len <= 55)  return 'text-4xl leading-[1.05]'
-  if (len <= 90)  return 'text-3xl leading-[1.1]'
-  if (len <= 140) return 'text-2xl leading-[1.15]'
-  return 'text-xl leading-[1.2]'
+  if (len <= 25)  return 'text-4xl leading-[1.0]'
+  if (len <= 50)  return 'text-3xl leading-[1.1]'
+  if (len <= 90)  return 'text-2xl leading-[1.2]'
+  if (len <= 140) return 'text-xl leading-[1.25]'
+  return 'text-lg leading-[1.3]'
 }
 
 export default function FieldNoteCard({ data }) {
@@ -27,7 +27,7 @@ export default function FieldNoteCard({ data }) {
           <div className={`font-display text-sc-cream break-words ${tCls}`}>
             {data.title}
           </div>
-          <p className="font-body text-xl text-sc-cream/80 mt-4 leading-snug line-clamp-3">
+          <p className="font-body text-base text-sc-cream/80 mt-3 leading-snug line-clamp-3">
             {data.snippet}
           </p>
         </main>

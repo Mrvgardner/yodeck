@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import Card from '../Card.jsx'
 
+// Sized to fit cleanly even in a 1x1 cell at TV resolution.
+// Larger cards (2x1, 1x2) just give the text more breathing room.
 function quoteSize(text) {
   const len = text?.length || 0
-  if (len <= 30)  return 'text-6xl leading-[0.95]'
-  if (len <= 60)  return 'text-5xl leading-[1.0]'
-  if (len <= 100) return 'text-4xl leading-[1.05]'
-  if (len <= 150) return 'text-3xl leading-[1.1]'
-  return 'text-2xl leading-[1.15]'
+  if (len <= 25)  return 'text-4xl leading-[1.0]'
+  if (len <= 50)  return 'text-3xl leading-[1.1]'
+  if (len <= 90)  return 'text-2xl leading-[1.2]'
+  if (len <= 140) return 'text-xl leading-[1.25]'
+  return 'text-lg leading-[1.3]'
 }
 
 const HIDDEN_MS = 25_000
@@ -37,7 +39,7 @@ export default function MovieQuoteCard({ data }) {
         </header>
 
         <main className="flex-1 min-h-0 overflow-hidden flex flex-col justify-center">
-          <span className={`font-display ${gold} text-6xl leading-none mb-1`} aria-hidden>“</span>
+          <span className={`font-display ${gold} text-3xl leading-none mb-1`} aria-hidden>“</span>
           <div className={`font-display text-sc-cream break-words ${tCls}`}>
             {data.text}
           </div>

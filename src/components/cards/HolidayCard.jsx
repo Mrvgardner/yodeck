@@ -18,10 +18,10 @@ function daysUntil(iso) {
 
 function nameSize(name) {
   const len = name?.length || 0
-  if (len <= 14)  return 'text-6xl leading-[0.9]'
-  if (len <= 22)  return 'text-5xl leading-[0.95]'
-  if (len <= 32)  return 'text-4xl leading-[1.0]'
-  return 'text-3xl leading-[1.05]'
+  if (len <= 12)  return 'text-5xl leading-[0.95]'
+  if (len <= 20)  return 'text-4xl leading-[1.0]'
+  if (len <= 30)  return 'text-3xl leading-[1.05]'
+  return 'text-2xl leading-[1.1]'
 }
 
 export default function HolidayCard({ data }) {
