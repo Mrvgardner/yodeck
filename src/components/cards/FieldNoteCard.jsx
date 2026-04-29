@@ -31,11 +31,11 @@ export default function FieldNoteCard({ data }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between border-t border-sc-cream/15 pt-5">
-          <span className="font-mono text-lg text-sc-cream/65 tracking-wider">
+        <div className="flex items-center justify-between gap-4 border-t border-sc-cream/15 pt-5">
+          <span className="font-mono text-lg text-sc-cream/65 tracking-wider truncate min-w-0 flex-shrink">
             {(data.author || 'Team').toUpperCase()}
           </span>
-          <span className="font-sc-bold text-xl text-sc-orange">
+          <span className="font-sc-bold text-lg text-sc-orange whitespace-nowrap flex-shrink-0">
             switchcommerce.team
           </span>
         </div>

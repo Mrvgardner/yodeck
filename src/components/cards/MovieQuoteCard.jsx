@@ -65,23 +65,25 @@ export default function MovieQuoteCard({ data }) {
             </span>
           </div>
 
-          {/* Subtle countdown — thin gold bar at the bottom of the card.
-              Fills from 0 → 100% over the hidden window. Disappears on reveal. */}
+        </div>
+
+        {/* Subtle countdown — thin gold bar at the bottom edge of the card.
+            CSS keyframe animation runs on mount (CSS transitions can't
+            animate from a property's initial value). Fades on reveal. */}
+        <div
+          className="absolute left-0 right-0 bottom-0 h-[4px] overflow-hidden rounded-b-[28px]"
+          aria-hidden
+          style={{
+            opacity: revealed ? 0 : 1,
+            transition: `opacity ${FADE_MS}ms ease-out`,
+          }}
+        >
           <div
-            className="absolute left-0 right-0 bottom-0 h-[3px] overflow-hidden rounded-b-[28px]"
-            aria-hidden
-          >
-            <div
-              className="h-full bg-[#d4a560]/70"
-              style={{
-                width: revealed ? '100%' : '0%',
-                opacity: revealed ? 0 : 1,
-                transition: revealed
-                  ? `opacity ${FADE_MS}ms ease-out`
-                  : `width ${HIDDEN_MS}ms linear`,
-              }}
-            />
-          </div>
+            className="h-full bg-[#d4a560]"
+            style={{
+              animation: `fillBar ${HIDDEN_MS}ms linear forwards`,
+            }}
+          />
         </div>
       </div>
     </Card>

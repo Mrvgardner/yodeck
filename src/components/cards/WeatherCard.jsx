@@ -54,24 +54,25 @@ export default function WeatherCard({ data }) {
           </div>
         </div>
 
-        {/* Hourly strip */}
-        <div className="border-t border-sc-cream/15 pt-4">
-          <div className="font-mono text-base text-sc-cream/45 tracking-widest mb-3">
+        {/* Hourly strip — compact 3-line layout (time / glyph / temp) tuned
+            so the bottom row doesn't clip even at the widest grid spans. */}
+        <div className="border-t border-sc-cream/15 pt-3">
+          <div className="font-mono text-xs text-sc-cream/45 tracking-widest mb-2">
             NEXT HOURS
           </div>
           <div className="grid grid-cols-6 gap-2">
             {hourly.map((h, i) => (
               <div
                 key={h.time + i}
-                className="flex flex-col items-center rounded-xl bg-white/5 ring-1 ring-white/10 px-1 py-3"
+                className="flex flex-col items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10 px-1 py-2"
               >
-                <span className="font-mono text-sm text-sc-cream/65 tracking-wider">
+                <span className="font-mono text-xs text-sc-cream/65 tracking-wider leading-tight">
                   {formatHour(h.time)}
                 </span>
-                <span className="text-3xl leading-none my-1" aria-hidden>
+                <span className="text-2xl leading-none my-0.5" aria-hidden>
                   {glyphFor(h.code)}
                 </span>
-                <span className="font-display text-2xl text-sc-cream leading-none">
+                <span className="font-display text-xl text-sc-cream leading-none">
                   {h.tempF}°
                 </span>
               </div>

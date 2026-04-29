@@ -19,6 +19,10 @@
   0%   { background-position: 0 0; }
   100% { background-position: 0 8px; }
 }
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
 
 @layer base {
   html, body, #root {
