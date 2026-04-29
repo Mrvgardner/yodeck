@@ -12,7 +12,7 @@ import { useNightlyReload } from './hooks/useNightlyReload.js'
 // Quotes + curated YouTube list are author-controlled mock content.
 // Field notes and BambooHR data come from live feeds only — never fall back
 // to invented examples, or the kitchen TV would show fake people/events.
-import { youtubeFeeds, quotes } from './data/mock.js'
+import { youtubeFeeds, quotes, movieQuotes } from './data/mock.js'
 import { FAKE_HEADLINES } from './data/headlines.js'
 
 function shuffle(arr) {
@@ -105,6 +105,7 @@ export default function App() {
     news,
     youtubeFeeds,
     quotes,
+    movieQuotes,
     weatherCard: weather ? { kind: 'weather', ...weather } : null,
   }), [birthdays, anniversaries, holidays, whosOut, fieldNotes, news, weather])
 

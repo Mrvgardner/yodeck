@@ -30,6 +30,7 @@ export default function Card({ children, className = '', surface = 'glass', padd
     amber:  'card-surface-amber text-white',
     cream:  'card-surface-cream text-sc-navy',
     storm:  'card-surface-storm text-sc-cream',
+    cinema: 'card-surface-cinema text-sc-cream',
   }[surface] || 'card-surface text-sc-cream'
 
   return (

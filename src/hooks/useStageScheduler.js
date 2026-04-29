@@ -23,6 +23,7 @@ const DWELL = {
   news:        42_000,   // headline + description = more to absorb
   youtube:     150_000,  // 2½ min — long enough to actually enjoy
   quote:       30_000,
+  movie:       28_000,
 }
 
 // Hard cap on simultaneous instances of a kind. Most kinds default to
@@ -45,6 +46,7 @@ const SIZE_PREFS = {
   news:        [[2,1], [1,2], [1,1]],
   youtube:     [[2,2], [2,1]],   // videos are landscape, no 1x2
   quote:       [[2,1], [1,2], [1,1]],
+  movie:       [[2,1], [1,1], [1,2]],
 }
 
 const EXIT_MS         = 900      // ~Card.jsx exit transition (0.8s) + buffer
@@ -108,6 +110,7 @@ function identityFor(card) {
     case 'fieldnote':   return `${card.kind}:${card.title}`
     case 'youtube':     return `${card.kind}:${card.videoId}`
     case 'quote':       return `${card.kind}:${card.text}`
+    case 'movie':       return `${card.kind}:${card.text}`
     case 'weather':     return `${card.kind}:${card.location}`
     default:            return `${card.kind}:${JSON.stringify(card)}`
   }
@@ -125,6 +128,7 @@ export function buildDeck(sources) {
   push(sources.news)
   push(sources.youtubeFeeds)
   push(sources.quotes)
+  push(sources.movieQuotes)
   if (sources.weatherCard) deck.push({ ...sources.weatherCard, _id: identityFor(sources.weatherCard) })
   return deck
 }

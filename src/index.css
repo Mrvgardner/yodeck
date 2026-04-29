@@ -95,6 +95,20 @@
     0 0 0 1px rgba(0, 26, 61, 0.1);
 }
 
+/* Cinema — for movie/TV quote cards. Charcoal black with warm gold
+   accents so it reads as theatrical / marquee. */
+.card-surface-cinema {
+  background: linear-gradient(
+    145deg,
+    rgb(28, 22, 18) 0%,
+    rgb(12, 8, 6) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 130, 0.18),
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 165, 96, 0.25);
+}
+
 /* Storm — for the weather/forecast card. Cool teal so it reads as
    "elements" and stays distinct from the navy data cards. */
 .card-surface-storm {

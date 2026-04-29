@@ -9,6 +9,7 @@ import NewsCard        from './cards/NewsCard.jsx'
 import YouTubeCard     from './cards/YouTubeCard.jsx'
 import QuoteCard       from './cards/QuoteCard.jsx'
 import WhosOutCard     from './cards/WhosOutCard.jsx'
+import MovieQuoteCard  from './cards/MovieQuoteCard.jsx'
 import { COLS, ROWS }  from '../hooks/useStageScheduler.js'
 
 // Memoized so a card never re-renders unless its data identity actually changes.
@@ -26,6 +27,7 @@ const CardFor = memo(function CardFor({ card }) {
     case 'youtube':     return <YouTubeCard     data={card} />
     case 'quote':       return <QuoteCard       data={card} />
     case 'whosout':     return <WhosOutCard     data={card} />
+    case 'movie':       return <MovieQuoteCard  data={card} />
     default:            return null
   }
 })
