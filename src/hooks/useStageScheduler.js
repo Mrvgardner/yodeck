@@ -23,7 +23,7 @@ const DWELL = {
   news:        42_000,   // headline + description = more to absorb
   youtube:     150_000,  // 2½ min — long enough to actually enjoy
   quote:       30_000,
-  movie:       28_000,
+  movie:       33_000,   // 25s hidden quote + ~8s reveal window
 }
 
 // Hard cap on simultaneous instances of a kind. Most kinds default to
