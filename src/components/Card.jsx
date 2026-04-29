@@ -1,26 +1,25 @@
 import { motion } from 'framer-motion'
 
-// The rain choreography — switched from spring physics to fixed-duration
-// tweens for performance. Springs require per-frame physics math in JS;
-// tweens precompute and hand off entirely to the GPU compositor.
+// The rain choreography — translate + opacity only.
+// Rotation and scale force non-axis-aligned compositing every frame; on the
+// Yodeck player that compounds with the iframe and ticker animation. Pure
+// translateY + opacity stays on the GPU's fast path.
 const dropIn = {
-  initial: { y: '-110vh', opacity: 0, rotate: -3 },
+  initial: { y: '-100vh', opacity: 0 },
   animate: {
-    y: 0, opacity: 1, rotate: 0,
+    y: 0, opacity: 1,
     transition: {
-      // ease-out-back-ish — quick drop, soft settle, no bounce iteration
-      duration: 0.9,
-      ease: [0.16, 1, 0.3, 1],
-      opacity: { duration: 0.35 },
+      duration: 0.7,
+      ease: [0.16, 1, 0.3, 1],   // ease-out-quint — quick drop, soft settle
+      opacity: { duration: 0.3 },
     },
   },
   exit: {
-    y: '130vh',
+    y: '100vh',
     opacity: 0,
-    rotate: 5,
     transition: {
-      duration: 1.2,
-      ease: [0.6, 0.04, 0.98, 0.16],
+      duration: 0.8,
+      ease: [0.4, 0, 0.7, 0],    // ease-in — accelerate as it falls
     },
   },
 }
@@ -30,6 +29,7 @@ export default function Card({ children, className = '', surface = 'glass', padd
     glass:  'card-surface text-sc-cream',
     amber:  'card-surface-amber text-white',
     cream:  'card-surface-cream text-sc-navy',
+    storm:  'card-surface-storm text-sc-cream',
   }[surface] || 'card-surface text-sc-cream'
 
   return (

@@ -23,7 +23,7 @@ export function useWeather(refreshMs = 15 * 60 * 1000) {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=2`
       try {
         const res  = await fetch(url)
         const json = await res.json()
@@ -31,6 +31,26 @@ export function useWeather(refreshMs = 15 * 60 * 1000) {
         const cur  = json.current
         const day  = json.daily
         const tempF = Math.round(cur.temperature_2m)
+
+        // Build the next 6 hourly slots starting from the current hour + 1.
+        // Open-Meteo returns parallel arrays of times + temps + codes.
+        const hourly = []
+        const times = json.hourly?.time || []
+        const temps = json.hourly?.temperature_2m || []
+        const codes = json.hourly?.weather_code   || []
+        const nowIdx = times.findIndex(t => new Date(t).getTime() > Date.now())
+        if (nowIdx > -1) {
+          for (let i = 0; i < 6 && nowIdx + i < times.length; i++) {
+            const idx = nowIdx + i
+            hourly.push({
+              time:      times[idx],            // ISO local
+              tempF:     Math.round(temps[idx]),
+              code:      codes[idx],
+              condition: CODE_MAP[codes[idx]] || '—',
+            })
+          }
+        }
+
         setWeather({
           location:       LABEL,
           tempF,
@@ -40,9 +60,13 @@ export function useWeather(refreshMs = 15 * 60 * 1000) {
           windMph:        Math.round(cur.wind_speed_10m),
           highF:          Math.round(day.temperature_2m_max?.[0] ?? tempF),
           lowF:           Math.round(day.temperature_2m_min?.[0] ?? tempF),
+          hourly,
         })
       } catch {
-        if (!cancelled) setWeather({ location: LABEL, tempF: '—', condition: 'Offline', windMph: 0, highF: '—', lowF: '—' })
+        if (!cancelled) setWeather({
+          location: LABEL, tempF: '—', condition: 'Offline',
+          windMph: 0, highF: '—', lowF: '—', hourly: [],
+        })
       }
     }
     load()

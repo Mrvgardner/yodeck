@@ -41,13 +41,13 @@ const SIZE_PREFS = {
   holiday:     [[1,1], [2,1], [1,2]],
   whosout:     [[1,1], [2,1], [1,2]],
   fieldnote:   [[2,1], [1,2], [1,1]],
-  weather:     [[1,1], [2,1], [1,2]],
+  weather:     [[2,1], [1,1]],   // forecast strip needs the wide layout
   news:        [[2,1], [1,2], [1,1]],
   youtube:     [[2,2], [2,1]],   // videos are landscape, no 1x2
   quote:       [[2,1], [1,2], [1,1]],
 }
 
-const EXIT_MS         = 1500     // ~Card.jsx exit transition + buffer
+const EXIT_MS         = 900      // ~Card.jsx exit transition (0.8s) + buffer
 const TICK_MS         = 500      // scheduler poll cadence
 const RECENT_COOLDOWN = 90_000   // a card just removed can't reappear for this long
 const KIND_COOLDOWN   = 12_000   // same kind can't reappear too quickly either
@@ -154,7 +154,13 @@ export function useStageScheduler({ deck }) {
       if (!hasVacancy(occ)) return false
 
       // On-screen set INCLUDES exiting cards — a card can't reappear while
-      // its predecessor is still falling out.
+      // its predecessor is still falling out, and concurrency caps still
+      // apply to exiting cards (so no two YouTube videos crossfade).
+      //
+      // EXCEPTION: bigOnScreen counts LIVE only. If the only big card has
+      // started exiting, we want the scheduler to immediately hunt for a
+      // replacement big card — otherwise small cards rush in to fill the
+      // freed cells and we get stuck with 8 small cards once the exit completes.
       const onScreenIds   = new Set()
       const onScreenKinds = new Set()
       const kindCounts    = new Map()  // kind → live+exiting count
@@ -164,7 +170,9 @@ export function useStageScheduler({ deck }) {
           onScreenIds.add(p.card._id)
           onScreenKinds.add(p.card.kind)
           kindCounts.set(p.card.kind, (kindCounts.get(p.card.kind) || 0) + 1)
-          if (p.w > 1 || p.h > 1) bigOnScreen = true
+        }
+        if (p.state === 'live' && (p.w > 1 || p.h > 1)) {
+          bigOnScreen = true
         }
       }
       // Hard concurrency caps — applied across all relaxation passes.
