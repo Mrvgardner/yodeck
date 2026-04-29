@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion'
-
-// Atmospheric backdrop: layered radial gradients + grid + scanlines.
-// Two slow-drifting orange/blue glows give the stage depth without distracting.
+// Atmospheric backdrop — fully static for Yodeck performance.
+// We previously had two 120–140px blur blobs animated with framer-motion;
+// those caused continuous GPU compositing and made the whole page jerky on
+// the kitchen player. Replaced with static radial gradients that give the
+// same visual depth at zero animation cost.
 export default function Background() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-sc-navy-deep">
@@ -13,25 +14,19 @@ export default function Background() {
             'radial-gradient(ellipse at 20% 0%, #002b5e 0%, #000d22 55%, #000814 100%)',
         }}
       />
-      {/* drifting amber glow upper-right */}
-      <motion.div
-        className="absolute -top-[12%] right-[-8%] h-[55%] w-[55%] rounded-full blur-[120px] opacity-30"
-        style={{ background: 'radial-gradient(circle, #ff4f00 0%, transparent 65%)' }}
-        animate={{ x: [0, 40, -10, 0], y: [0, 20, -10, 0] }}
-        transition={{ duration: 60, repeat: Infinity, ease: 'easeInOut' }}
+      {/* static amber glow upper-right */}
+      <div
+        className="absolute -top-[12%] right-[-8%] h-[55%] w-[55%] rounded-full opacity-20"
+        style={{ background: 'radial-gradient(circle, #ff4f00 0%, transparent 70%)' }}
       />
-      {/* drifting blue glow lower-left */}
-      <motion.div
-        className="absolute bottom-[-12%] left-[-10%] h-[60%] w-[60%] rounded-full blur-[140px] opacity-40"
-        style={{ background: 'radial-gradient(circle, #1d4980 0%, transparent 65%)' }}
-        animate={{ x: [0, -30, 20, 0], y: [0, -20, 15, 0] }}
-        transition={{ duration: 75, repeat: Infinity, ease: 'easeInOut' }}
+      {/* static blue glow lower-left */}
+      <div
+        className="absolute bottom-[-12%] left-[-10%] h-[60%] w-[60%] rounded-full opacity-30"
+        style={{ background: 'radial-gradient(circle, #1d4980 0%, transparent 70%)' }}
       />
-      {/* grid */}
-      <div className="absolute inset-0 bg-stage-grid opacity-60" />
-      {/* scanlines */}
+      {/* grid + scanlines + vignette — pure static patterns, no animation cost */}
+      <div className="absolute inset-0 bg-stage-grid opacity-50" />
       <div className="absolute inset-0 bg-scanlines" />
-      {/* vignette */}
       <div
         className="absolute inset-0"
         style={{
