@@ -95,14 +95,14 @@
     0 0 0 1px rgba(0, 26, 61, 0.1);
 }
 
-/* Status pip */
+/* Status pip — single soft glow (was double) for cheaper paint */
 .status-pip {
   display: inline-block;
   width: 10px;
   height: 10px;
   border-radius: 9999px;
   background: #ff4f00;
-  box-shadow: 0 0 12px #ff4f00, 0 0 24px rgba(255, 79, 0, 0.4);
+  box-shadow: 0 0 10px rgba(255, 79, 0, 0.7);
   animation: breathe 2s ease-in-out infinite;
 }
 

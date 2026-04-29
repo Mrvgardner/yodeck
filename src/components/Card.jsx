@@ -1,28 +1,26 @@
 import { motion } from 'framer-motion'
 
-// The rain choreography:
-//  - enter: drop in from above the viewport with a damped spring + slight tilt
-//  - exit:  fall through the bottom, accelerating with rotation, fading
+// The rain choreography — switched from spring physics to fixed-duration
+// tweens for performance. Springs require per-frame physics math in JS;
+// tweens precompute and hand off entirely to the GPU compositor.
 const dropIn = {
-  initial:  { y: '-120vh', opacity: 0, rotate: -4, scale: 0.96 },
-  animate:  {
-    y: 0, opacity: 1, rotate: 0, scale: 1,
+  initial: { y: '-110vh', opacity: 0, rotate: -3 },
+  animate: {
+    y: 0, opacity: 1, rotate: 0,
     transition: {
-      type: 'spring',
-      stiffness: 70,
-      damping: 14,
-      mass: 1.2,
-      opacity: { duration: 0.4 },
+      // ease-out-back-ish — quick drop, soft settle, no bounce iteration
+      duration: 0.9,
+      ease: [0.16, 1, 0.3, 1],
+      opacity: { duration: 0.35 },
     },
   },
   exit: {
-    y: '140vh',
+    y: '130vh',
     opacity: 0,
-    rotate: 6,
-    scale: 0.94,
+    rotate: 5,
     transition: {
-      duration: 1.4,
-      ease: [0.6, 0.04, 0.98, 0.16], // sharp accelerating fall
+      duration: 1.2,
+      ease: [0.6, 0.04, 0.98, 0.16],
     },
   },
 }

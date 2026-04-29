@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
+import LiveClock from './LiveClock.jsx'
 
-function useNow(intervalMs = 1000) {
-  const [now, setNow] = useState(new Date())
+function useTodayDate() {
+  // Re-evaluates only on midnight crossings — avoids a per-second re-render
+  // for a value that changes once a day.
+  const [today, setToday] = useState(() => new Date())
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), intervalMs)
-    return () => clearInterval(id)
-  }, [intervalMs])
-  return now
+    const now = new Date()
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1)
+    const t = setTimeout(() => setToday(new Date()), nextMidnight - now)
+    return () => clearTimeout(t)
+  }, [today])
+  return today
 }
 
-export default function HeaderBar({ weather }) {
-  const now = useNow()
-  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-  const date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+function HeaderBarBase({ weather }) {
+  const today = useTodayDate()
+  const date = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const [weekday, ...rest] = date.split(',')
+  const restDate = rest.join(',').trim().toUpperCase()
 
   return (
     <header className="flex items-center justify-between px-12 py-8 border-b border-sc-cream/10">
@@ -25,25 +31,14 @@ export default function HeaderBar({ weather }) {
         </div>
       </div>
 
-      {/* Live clock */}
-      <div className="flex items-baseline gap-4">
-        <span className="font-display text-[8rem] leading-none text-sc-cream tracking-tight">
-          {time.replace(/\sAM|\sPM/i, '')}
-        </span>
-        <span className="font-display text-5xl text-sc-orange">
-          {time.match(/AM|PM/i)?.[0]}
-        </span>
-      </div>
+      {/* Live clock — isolated so per-second ticks don't re-render the rest */}
+      <LiveClock />
 
       {/* Date + weather pill */}
       <div className="flex items-center gap-6">
         <div className="text-right">
-          <div className="font-sc-bold text-2xl text-sc-cream">
-            {date.split(',')[0]}
-          </div>
-          <div className="font-mono text-xl text-sc-cream/60 tracking-wider">
-            {date.split(',').slice(1).join(',').trim().toUpperCase()}
-          </div>
+          <div className="font-sc-bold text-2xl text-sc-cream">{weekday}</div>
+          <div className="font-mono text-xl text-sc-cream/60 tracking-wider">{restDate}</div>
         </div>
         {weather && (
           <div className="flex items-center gap-3 rounded-full bg-sc-orange/15 ring-1 ring-sc-orange/40 px-6 py-3">
@@ -60,3 +55,7 @@ export default function HeaderBar({ weather }) {
     </header>
   )
 }
+
+// Memo so HeaderBar only re-renders when weather actually changes (every
+// ~15 min) — not whenever a parent re-renders for unrelated reasons.
+export default memo(HeaderBarBase)

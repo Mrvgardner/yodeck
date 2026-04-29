@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import BirthdayCard    from './cards/BirthdayCard.jsx'
 import AnniversaryCard from './cards/AnniversaryCard.jsx'
@@ -10,7 +11,10 @@ import QuoteCard       from './cards/QuoteCard.jsx'
 import WhosOutCard     from './cards/WhosOutCard.jsx'
 import { COLS, ROWS }  from '../hooks/useStageScheduler.js'
 
-function CardFor({ card }) {
+// Memoized so a card never re-renders unless its data identity actually changes.
+// Big win for the YouTube card — without memo, every parent re-render would
+// remount the iframe.
+const CardFor = memo(function CardFor({ card }) {
   if (!card) return null
   switch (card.kind) {
     case 'birthday':    return <BirthdayCard    data={card} />
@@ -24,14 +28,14 @@ function CardFor({ card }) {
     case 'whosout':     return <WhosOutCard     data={card} />
     default:            return null
   }
-}
+})
 
 // Each placement renders into its own grid cell (with spans). AnimatePresence
 // inside each placement-cell lets the rain in / fall out animations overlap
 // with neighbors without affecting layout.
 export default function Stage({ placements }) {
   return (
-    <main className="relative flex-1 px-8 py-6 stage-mask">
+    <main className="relative flex-1 px-8 py-6">
       <div
         className="grid h-full gap-8"
         style={{
