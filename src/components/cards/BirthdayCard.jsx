@@ -13,11 +13,22 @@ const NAME_TIERS = [
 const AVATAR_BY_SCALE = ['h-[72px] w-[72px] text-3xl', 'h-[110px] w-[110px] text-5xl', 'h-[160px] w-[160px] text-7xl']
 const FOOTER_BY_SCALE = ['text-2xl', 'text-4xl', 'text-6xl']
 
+function birthdayLabel(next) {
+  if (!next) return 'TODAY'
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const occ = new Date(next)
+  occ.setHours(0, 0, 0, 0)
+  if (occ.getTime() === today.getTime()) return 'TODAY'
+  return `${occ.getMonth() + 1}/${occ.getDate()}`
+}
+
 export default function BirthdayCard({ data, size }) {
   const scale  = scaleOf(size)
   const nCls   = pickByLen(data.name, scale, NAME_BANDS, NAME_TIERS)
   const avatar = AVATAR_BY_SCALE[scale]
   const footer = FOOTER_BY_SCALE[scale]
+  const label  = birthdayLabel(data._next)
   return (
     <Card surface="amber">
       <div className="flex flex-col h-full gap-4">
@@ -26,7 +37,7 @@ export default function BirthdayCard({ data, size }) {
             ✦ BIRTHDAY
           </span>
           <span className="font-mono text-xl tracking-widest text-white/75">
-            TODAY
+            {label}
           </span>
         </header>
 
