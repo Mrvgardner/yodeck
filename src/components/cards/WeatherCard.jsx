@@ -1,17 +1,7 @@
 import Card from '../Card.jsx'
 import { scaleOf } from '../../utils/cardSize.js'
+import { WeatherIcon } from '../icons.jsx'
 
-function glyphFor(code) {
-  if (code == null) return '·'
-  if (code === 0)   return '☀'
-  if (code <= 3)    return '⛅'
-  if (code <= 48)   return '☁'
-  if (code <= 67)   return '☂'
-  if (code <= 77)   return '❄'
-  if (code <= 82)   return '☂'
-  if (code >= 95)   return '⚡'
-  return '·'
-}
 // One shared formatter — toLocaleTimeString builds a new Intl formatter per call.
 const HOUR_FMT = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: true })
 function formatHour(iso) {
@@ -67,7 +57,7 @@ export default function WeatherCard({ data, size }) {
                   {formatHour(h.time)}
                 </span>
                 <span className={`${GLYPH_BY_SCALE[scale]} leading-none my-1`} aria-hidden>
-                  {glyphFor(h.code)}
+                  <WeatherIcon code={h.code} />
                 </span>
                 <span className={`font-display ${TEMP_BY_SCALE[scale]} text-sc-cream leading-none`}>
                   {h.tempF}°

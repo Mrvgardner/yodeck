@@ -151,15 +151,14 @@
   animation: breathe 2s ease-in-out infinite;
 }
 
-/* Marquee track for ticker — duplicated items + -50% translation = seamless loop. */
+/* Marquee track for ticker — duplicated items + -50% translation = seamless loop.
+   Spacing lives on the ◆ separator (mx-16 in Ticker.jsx) so it sits centered
+   between headlines. */
 .ticker-track {
   display: inline-flex;
   white-space: nowrap;
   animation: tickerSlide 180s linear infinite;
   will-change: transform;
-}
-.ticker-track > * {
-  padding: 0 4rem;
 }
 
 /* ─── Halloween critters (HalloweenOverlay.jsx) ─────────────────────

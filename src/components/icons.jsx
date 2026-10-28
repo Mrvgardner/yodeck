@@ -34,3 +34,76 @@ export function CakeIcon({ className = '' }) {
     </svg>
   )
 }
+
+// ─── Weather ───────────────────────────────────────────────────────
+// Replaces ☀ ⛅ ☁ ☂ ❄ ⚡, which the player can't draw either.
+const SUN    = '#ffc247'
+const CLOUD  = '#e8eef5'
+const SHADE  = '#b9c6d4'
+const RAIN   = '#6cc4ff'
+
+function Sun({ cx = 50, cy = 50, r = 18 }) {
+  const rays = Array.from({ length: 8 }, (_, i) => {
+    const a = (i * Math.PI) / 4
+    const x1 = cx + Math.cos(a) * (r + 7), y1 = cy + Math.sin(a) * (r + 7)
+    const x2 = cx + Math.cos(a) * (r + 16), y2 = cy + Math.sin(a) * (r + 16)
+    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={SUN} strokeWidth="6" strokeLinecap="round" />
+  })
+  return <g>{rays}<circle cx={cx} cy={cy} r={r} fill={SUN} /></g>
+}
+
+// Cloud whose flat bottom sits at y = 78 + dy.
+function Cloud({ fill = CLOUD, dy = 0 }) {
+  return (
+    <path
+      transform={`translate(0 ${dy})`}
+      d="M24,78 C12,78 8,62 20,57 C18,43 34,36 43,45 C47,30 72,30 74,48 C88,47 92,64 82,70 C82,75 79,78 74,78 Z"
+      fill={fill}
+    />
+  )
+}
+
+export function WeatherIcon({ code, className = '' }) {
+  let body
+  if (code == null) {
+    body = <circle cx="50" cy="50" r="5" fill={SHADE} />
+  } else if (code === 0) {
+    body = <Sun />
+  } else if (code <= 3) {
+    body = <><Sun cx={36} cy={36} r={15} /><Cloud dy={6} /></>
+  } else if (code <= 48) {
+    body = <><Cloud fill={SHADE} dy={-14} /><Cloud dy={0} /></>
+  } else if ((code <= 67) || (code >= 80 && code <= 82)) {
+    body = (
+      <>
+        <Cloud dy={-14} />
+        {[30, 50, 70].map(x => (
+          <line key={x} x1={x} y1="72" x2={x - 6} y2="90" stroke={RAIN} strokeWidth="6" strokeLinecap="round" />
+        ))}
+      </>
+    )
+  } else if (code <= 77) {
+    body = (
+      <>
+        <Cloud dy={-14} />
+        {[30, 50, 70].map((x, i) => (
+          <circle key={x} cx={x} cy={i % 2 ? 88 : 80} r="5" fill="#ffffff" />
+        ))}
+      </>
+    )
+  } else if (code >= 95) {
+    body = (
+      <>
+        <Cloud fill={SHADE} dy={-14} />
+        <path d="M54,62 L40,82 L50,82 L44,98 L62,74 L52,74 L58,62 Z" fill={SUN} />
+      </>
+    )
+  } else {
+    body = <circle cx="50" cy="50" r="5" fill={SHADE} />
+  }
+  return (
+    <svg className={className} width="1em" height="1em" viewBox="0 0 100 100" aria-hidden>
+      {body}
+    </svg>
+  )
+}

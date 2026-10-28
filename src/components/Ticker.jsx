@@ -17,7 +17,7 @@ function Ticker({ items, label = 'LIVE · KITCHEN FEED' }) {
         <div className="ticker-track">
           {trackItems.map((it, i) => (
             <span key={i} className="font-display text-3xl text-sc-cream tracking-wide">
-              <span className="text-sc-orange mr-4">◆</span>
+              <span className="text-sc-orange mx-16">◆</span>
               {it}
             </span>
           ))}
