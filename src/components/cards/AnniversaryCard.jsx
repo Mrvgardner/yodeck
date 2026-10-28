@@ -1,5 +1,5 @@
 import Card from '../Card.jsx'
-import { scaleOf, pickByLen } from '../../utils/cardSize.js'
+import { scaleOf, heightScaleOf, pickByLen } from '../../utils/cardSize.js'
 
 const NAME_BANDS = [12, 20]
 const NAME_TIERS = [
@@ -13,8 +13,9 @@ const LABEL_BY_SCALE   = ['text-2xl',    'text-4xl',     'text-6xl']
 const AVATAR_BY_SCALE  = ['h-[56px] w-[56px] text-2xl', 'h-[80px] w-[80px] text-4xl', 'h-[120px] w-[120px] text-6xl']
 
 export default function AnniversaryCard({ data, size }) {
-  const scale = scaleOf(size)
-  const nCls  = pickByLen(data.name, scale, NAME_BANDS, NAME_TIERS)
+  const scale  = scaleOf(size)
+  const vScale = heightScaleOf(size)   // number, label + avatar are height-bound
+  const nCls   = pickByLen(data.name, scale, NAME_BANDS, NAME_TIERS)
   return (
     <Card surface="glass">
       <div className="flex flex-col h-full gap-4">
@@ -27,10 +28,10 @@ export default function AnniversaryCard({ data, size }) {
 
         <main className="flex-1 min-h-0 overflow-hidden flex flex-col justify-center">
           <div className="flex items-baseline gap-4">
-            <div className={`font-display ${NUM_BY_SCALE[scale]} leading-[0.8] text-sc-orange`}>
+            <div className={`font-display ${NUM_BY_SCALE[vScale]} leading-[0.8] text-sc-orange`}>
               {data.years}
             </div>
-            <div className={`font-display ${LABEL_BY_SCALE[scale]} text-sc-cream/90 leading-tight`}>
+            <div className={`font-display ${LABEL_BY_SCALE[vScale]} text-sc-cream/90 leading-tight`}>
               YEARS<br />STRONG
             </div>
           </div>
@@ -38,7 +39,7 @@ export default function AnniversaryCard({ data, size }) {
 
         <footer className="flex-shrink-0 flex items-center gap-4 border-t border-sc-cream/15 pt-4">
           <div
-            className={`${AVATAR_BY_SCALE[scale]} flex flex-shrink-0 items-center justify-center rounded-xl bg-sc-orange/15 font-display text-sc-orange ring-1 ring-sc-orange/40`}
+            className={`${AVATAR_BY_SCALE[vScale]} flex flex-shrink-0 items-center justify-center rounded-xl bg-sc-orange/15 font-display text-sc-orange ring-1 ring-sc-orange/40`}
             aria-hidden
           >
             {data.initials}

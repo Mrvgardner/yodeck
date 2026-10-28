@@ -1,5 +1,5 @@
 import Card from '../Card.jsx'
-import { scaleOf } from '../../utils/cardSize.js'
+import { scaleOf, heightScaleOf } from '../../utils/cardSize.js'
 import { PumpkinIcon } from '../icons.jsx'
 
 // Countdown to Oct 31 of the current year. Only shown while the Halloween
@@ -19,7 +19,8 @@ const PUMPKIN_BY_SCALE = ['text-6xl',    'text-8xl',     'text-[9rem]']
 const TAGLINE_BY_SCALE = ['text-xl',     'text-2xl',     'text-4xl']
 
 export default function HalloweenCard({ data, size }) {
-  const scale = scaleOf(size)
+  const scale  = scaleOf(size)
+  const vScale = heightScaleOf(size)   // countdown block is height-bound
   const { big, label } = countdown()
   const tall  = (size?.h || 1) > (size?.w || 1)   // 1×2: stack pumpkin above the number
   return (
@@ -33,12 +34,12 @@ export default function HalloweenCard({ data, size }) {
         </header>
 
         <main className={`flex-1 min-h-0 overflow-hidden flex items-center justify-center gap-6 ${tall ? 'flex-col text-center' : ''}`}>
-          <span className={`${PUMPKIN_BY_SCALE[scale]} leading-none flex-shrink-0`}><PumpkinIcon /></span>
+          <span className={`${PUMPKIN_BY_SCALE[vScale]} leading-none flex-shrink-0`}><PumpkinIcon /></span>
           <div className="flex flex-col min-w-0">
-            <div className={`font-spooky ${BIG_BY_SCALE[scale]} leading-[0.85] text-sc-orange`}>
+            <div className={`font-spooky ${BIG_BY_SCALE[vScale]} leading-[0.85] text-sc-orange`}>
               {big}
             </div>
-            <div className={`font-spooky ${LABEL_BY_SCALE[scale]} text-sc-cream/90 leading-tight tracking-wide`}>
+            <div className={`font-spooky ${LABEL_BY_SCALE[vScale]} text-sc-cream/90 leading-tight tracking-wide`}>
               {label}
             </div>
           </div>

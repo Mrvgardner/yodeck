@@ -51,9 +51,9 @@ export default function WhosOutCard({ data, size }) {
         </main>
 
         <footer className="flex-shrink-0 flex items-end justify-between border-t border-sc-cream/15 pt-4">
-          <span className={`font-display ${DAYS_BY_SCALE[scale]} text-sc-orange leading-none`}>
+          <span className={`font-display ${DAYS_BY_SCALE[scale]} text-sc-orange leading-none inline-flex items-baseline`}>
             {data.days ?? '—'}
-            <span className="font-mono text-sm text-sc-cream/65 ml-2 tracking-wider align-middle">
+            <span className="font-mono text-sm text-sc-cream/65 ml-2 tracking-wider">
               DAY{data.days === 1 ? '' : 'S'}
             </span>
           </span>

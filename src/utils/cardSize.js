@@ -18,6 +18,15 @@ export function scaleOf(size) {
   return 0                  // 1×1 — small
 }
 
+// Like scaleOf, but for elements limited by HEIGHT (big numbers, avatars,
+// stacked labels). A 2×1 card is two cells wide but only one row tall, so
+// height-hungry pieces must stay at the 1×1 tier there or they overflow.
+export function heightScaleOf(size) {
+  const h = size?.h || 1
+  if (h < 2) return 0
+  return scaleOf(size)
+}
+
 // Pick a class from a 3-tier table by length band + scale.
 // `tiers` shape: [ [smallA, mediumA, largeA], [smallB, mediumB, largeB], ... ]
 // where each row corresponds to a length band, in ascending order.

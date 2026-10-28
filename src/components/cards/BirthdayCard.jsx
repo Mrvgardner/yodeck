@@ -65,7 +65,7 @@ export default function BirthdayCard({ data, size }) {
           <span className={`font-display ${footer} text-white tracking-wide`}>
             HAPPY BIRTHDAY
           </span>
-          <span className={`${footer} text-white/95 leading-none`}><CakeIcon /></span>
+          <span className={`${footer} text-white/95 leading-none flex`}><CakeIcon /></span>
         </footer>
       </div>
     </Card>
