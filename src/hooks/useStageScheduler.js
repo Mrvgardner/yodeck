@@ -134,6 +134,21 @@ function findFreeRects(occ, w, h) {
   return shuffle(out)
 }
 
+// The stage is two 2×2 halves (columns 0–1 and 2–3). If one card of a half
+// left on its own, the gap would match its mate's shape (tall beside tall,
+// wide under wide) and that orientation would lock in. So the cards in a
+// half always leave together, and every turnover picks a fresh shape.
+//   - mate finishing soon (≤ MATE_WAIT_MS): the expiring card waits for it,
+//     so nobody gets cut off mid-read;
+//   - otherwise the mate leaves early with it.
+// Mates placed together afterwards stay in sync, so early exits are rare.
+const halfOf = (p) => Math.floor(p.x / 2)
+const MATE_WAIT_MS = 15_000
+function liveMate(placements, p) {
+  return Object.values(placements).find(q =>
+    q.id !== p.id && q.state === 'live' && halfOf(q) === halfOf(p))
+}
+
 function hasVacancy(occ) {
   for (let y = 0; y < ROWS; y++)
     for (let x = 0; x < COLS; x++)
@@ -212,6 +227,13 @@ export function useStageScheduler({ deck }) {
           kindCounts.set(p.card.kind, (kindCounts.get(p.card.kind) || 0) + 1)
         }
       }
+      // Live shape mix, so new cards can lean toward whatever's missing.
+      const shapeCounts = new Map()  // 'w×h' → live count
+      for (const p of Object.values(current)) {
+        if (p.state !== 'live') continue
+        const k = `${p.w}x${p.h}`
+        shapeCounts.set(k, (shapeCounts.get(k) || 0) + 1)
+      }
       const countOf  = (kind) => kindCounts.get(kind) || 0
       const isCapped = (kind) => countOf(kind) >= KIND_CAP
       const isCappedFallback = (kind) =>
@@ -250,9 +272,10 @@ export function useStageScheduler({ deck }) {
           const skip = skipUntilRef.current.get(card._id)
           if (skip && skip > now) continue
 
-          // Shuffled so wide, tall and 2×2 all get airtime — a fixed order
-          // would let the first size that fits win every time.
+          // Least-shown shape first (ties shuffled) so wide, tall and 2×2
+          // all get airtime instead of one orientation taking over.
           const sizes = shuffle(SIZE_PREFS[card.kind] || DEFAULT_SIZES)
+            .sort((a, b) => (shapeCounts.get(`${a[0]}x${a[1]}`) || 0) - (shapeCounts.get(`${b[0]}x${b[1]}`) || 0))
           let placed = false
           for (const [w, h] of sizes) {
             const rects = findFreeRects(occ, w, h)
@@ -311,7 +334,16 @@ export function useStageScheduler({ deck }) {
       for (const [id, p] of Object.entries(cur)) {
         if (p.state === 'live' && p.expiresAt <= now) {
           if (!mutated) { next = { ...cur }; mutated = true }
+          // Halves turn over as a unit (see liveMate / MATE_WAIT_MS).
+          const mate = liveMate(cur, p)
+          if (mate && mate.expiresAt > now && mate.expiresAt - now <= MATE_WAIT_MS) {
+            next[id] = { ...p, expiresAt: mate.expiresAt }
+            continue
+          }
           next[id] = { ...p, state: 'exiting', exitedAt: now }
+          if (mate && mate.expiresAt > now) {
+            next[mate.id] = { ...mate, state: 'exiting', exitedAt: now }
+          }
         }
       }
       for (const [id, p] of Object.entries(next)) {

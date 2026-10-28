@@ -1,5 +1,6 @@
 import Card from '../Card.jsx'
 import { scaleOf, pickByLen } from '../../utils/cardSize.js'
+import { CakeIcon } from '../icons.jsx'
 
 // Tiers per name length × card size.
 //                     [ small (1x1), medium (2x1/1x2), large (2x2) ]
@@ -64,7 +65,7 @@ export default function BirthdayCard({ data, size }) {
           <span className={`font-display ${footer} text-white tracking-wide`}>
             HAPPY BIRTHDAY
           </span>
-          <span className={`font-display ${footer} text-white/95`}>🎂</span>
+          <span className={`${footer} text-white/95 leading-none`}><CakeIcon /></span>
         </footer>
       </div>
     </Card>

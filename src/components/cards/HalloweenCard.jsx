@@ -1,5 +1,6 @@
 import Card from '../Card.jsx'
 import { scaleOf } from '../../utils/cardSize.js'
+import { PumpkinIcon } from '../icons.jsx'
 
 // Countdown to Oct 31 of the current year. Only shown while the Halloween
 // theme is active, so we never need to handle "after Halloween".
@@ -32,7 +33,7 @@ export default function HalloweenCard({ data, size }) {
         </header>
 
         <main className={`flex-1 min-h-0 overflow-hidden flex items-center justify-center gap-6 ${tall ? 'flex-col text-center' : ''}`}>
-          <span className={`${PUMPKIN_BY_SCALE[scale]} leading-none`} aria-hidden>🎃</span>
+          <span className={`${PUMPKIN_BY_SCALE[scale]} leading-none flex-shrink-0`}><PumpkinIcon /></span>
           <div className="flex flex-col min-w-0">
             <div className={`font-spooky ${BIG_BY_SCALE[scale]} leading-[0.85] text-sc-orange`}>
               {big}
