@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { preloadCard } from '../utils/preload.js'
 
-// Stage layout: 4 columns × 2 rows = 8 cells. Cards may span 1×1, 2×1, 1×2, 2×2.
+// Stage layout: 4 columns × 2 rows = 8 cells. Cards span 2×1, 1×2 or 2×2.
 // The scheduler maintains a set of "placements", each pinned to a rectangular
 // region of the grid. When a placement's TTL expires it begins exiting; the
 // cells it occupies are released for new placements as soon as exit starts,
@@ -24,30 +24,54 @@ const DWELL = {
   youtube:     150_000,  // 2½ min — long enough to actually enjoy
   quote:       30_000,
   movie:       33_000,   // 25s hidden quote + ~8s reveal window
+  halloween:   30_000,
 }
 
-// Hard cap on simultaneous instances of a kind. Most kinds default to
-// "unlimited" (`Infinity`); YouTube is capped at 1 so two videos never play
-// at once (audio collisions + visual fight for attention).
-const MAX_CONCURRENT = {
-  youtube: 1,
+// Variety rule: one card per kind on screen. The stage only holds 2–4 cards,
+// so three movie quotes at once crowds out everything else. When a card
+// exits, its slot waits (~1s) for the exit to finish rather than doubling
+// up. Only when the whole deck has fewer kinds than the stage has slots
+// (e.g. local dev with no news feed) may a second of a kind appear — never
+// a third. YouTube is never doubled (audio collisions).
+const KIND_CAP          = 1
+const KIND_CAP_FALLBACK = 2
+const MAX_SLOTS         = 4
+const NEVER_DOUBLE      = new Set(['youtube'])
+
+// How strongly each kind competes for an open slot. Quotes and movie quotes
+// make up most of the deck by count, so without weighting they'd win nearly
+// every draw and bury news, weather and people cards.
+const KIND_WEIGHT = {
+  birthday:    4,
+  anniversary: 4,
+  holiday:     3,
+  whosout:     3,
+  fieldnote:   3,
+  news:        3,
+  weather:     3,
+  halloween:   2,
+  youtube:     2,
+  quote:       1,
+  movie:       1,
 }
 
-// Per-kind preferred sizes, in order of preference for normal placement.
-// When the stage needs a big card (no live ≥2-cell card), these get sorted
-// by area descending and ties shuffled — so 2x1 vs 1x2 split roughly evenly.
+// Per-kind allowed sizes. Every card spans at least 2 cells so the stage
+// holds 2–4 cards at a time (big, readable at kitchen distance). Order
+// doesn't matter — sizes are shuffled per placement for variety.
 const SIZE_PREFS = {
-  birthday:    [[1,1], [2,1], [1,2]],
-  anniversary: [[1,1], [2,1], [1,2]],
-  holiday:     [[1,1], [2,1], [1,2]],
-  whosout:     [[1,1], [2,1], [1,2]],
-  fieldnote:   [[2,1], [1,2], [1,1]],
-  weather:     [[2,1], [1,1]],   // forecast strip needs the wide layout
-  news:        [[2,1], [1,2], [1,1]],
+  birthday:    [[2,1], [1,2], [2,2]],
+  anniversary: [[2,1], [1,2], [2,2]],
+  holiday:     [[2,1], [1,2], [2,2]],
+  whosout:     [[2,1], [1,2]],
+  fieldnote:   [[2,1], [1,2], [2,2]],
+  weather:     [[2,1], [1,2], [2,2]],
+  news:        [[2,1], [1,2], [2,2]],
   youtube:     [[2,2], [2,1]],   // videos are landscape, no 1x2
-  quote:       [[2,1], [1,2], [1,1]],
-  movie:       [[2,1], [1,1], [1,2]],
+  quote:       [[2,1], [1,2], [2,2]],
+  movie:       [[2,1], [1,2], [2,2]],
+  halloween:   [[2,1], [1,2], [2,2]],
 }
+const DEFAULT_SIZES = [[2,1], [1,2]]
 
 const EXIT_MS         = 900      // ~Card.jsx exit transition (0.8s) + buffer
 const TICK_MS         = 500      // scheduler poll cadence
@@ -61,6 +85,20 @@ function shuffle(arr) {
     ;[a[i], a[j]] = [a[j], a[i]]
   }
   return a
+}
+
+// Order a pool kind-first: kinds drawn by weighted random (Efraimidis–
+// Spirakis keys), cards shuffled within each kind.
+function weightedByKind(pool) {
+  const byKind = new Map()
+  for (const c of pool) {
+    if (!byKind.has(c.kind)) byKind.set(c.kind, [])
+    byKind.get(c.kind).push(c)
+  }
+  return [...byKind.keys()]
+    .map(k => ({ k, key: Math.random() ** (1 / (KIND_WEIGHT[k] ?? 1)) }))
+    .sort((a, b) => b.key - a.key)
+    .flatMap(({ k }) => shuffle(byKind.get(k)))
 }
 
 function emptyOcc() {
@@ -78,10 +116,14 @@ function computeOcc(placements) {
   return occ
 }
 
+// 2-wide rects snap to even columns, so the 4×2 stage behaves as two 2×2
+// halves. With only 2- and 4-cell cards, that guarantees no orphaned 1×1
+// holes that nothing could fill.
 function findFreeRects(occ, w, h) {
   const out = []
+  const xStep = w === 2 ? 2 : 1
   for (let y = 0; y <= ROWS - h; y++) {
-    for (let x = 0; x <= COLS - w; x++) {
+    for (let x = 0; x <= COLS - w; x += xStep) {
       let ok = true
       for (let dy = 0; dy < h && ok; dy++)
         for (let dx = 0; dx < w && ok; dx++)
@@ -112,6 +154,7 @@ function identityFor(card) {
     case 'quote':       return `${card.kind}:${card.text}`
     case 'movie':       return `${card.kind}:${card.text}`
     case 'weather':     return `${card.kind}:${card.location}`
+    case 'halloween':   return `${card.kind}:${card.tagline}`
     default:            return `${card.kind}:${JSON.stringify(card)}`
   }
 }
@@ -129,6 +172,7 @@ export function buildDeck(sources) {
   push(sources.youtubeFeeds)
   push(sources.quotes)
   push(sources.movieQuotes)
+  push(sources.extras)
   if (sources.weatherCard) deck.push({ ...sources.weatherCard, _id: identityFor(sources.weatherCard) })
   return deck
 }
@@ -160,36 +204,18 @@ export function useStageScheduler({ deck }) {
       // On-screen set INCLUDES exiting cards — a card can't reappear while
       // its predecessor is still falling out, and concurrency caps still
       // apply to exiting cards (so no two YouTube videos crossfade).
-      //
-      // EXCEPTION: bigOnScreen counts LIVE only. If the only big card has
-      // started exiting, we want the scheduler to immediately hunt for a
-      // replacement big card — otherwise small cards rush in to fill the
-      // freed cells and we get stuck with 8 small cards once the exit completes.
       const onScreenIds   = new Set()
-      const onScreenKinds = new Set()
       const kindCounts    = new Map()  // kind → live+exiting count
-      let bigOnScreen = false
       for (const p of Object.values(current)) {
         if (p.state === 'live' || p.state === 'exiting') {
           onScreenIds.add(p.card._id)
-          onScreenKinds.add(p.card.kind)
           kindCounts.set(p.card.kind, (kindCounts.get(p.card.kind) || 0) + 1)
         }
-        if (p.state === 'live' && (p.w > 1 || p.h > 1)) {
-          bigOnScreen = true
-        }
       }
-      // Hard concurrency caps — applied across all relaxation passes.
-      const isCapped = (kind) => {
-        const cap = MAX_CONCURRENT[kind] ?? Infinity
-        return (kindCounts.get(kind) || 0) >= cap
-      }
-      // Layout rule: at least one card on screen must span ≥ 2 cells. 8 small
-      // cards is too dense to read at kitchen distance. When no big card is
-      // present, we flip the size preferences so the next placement strongly
-      // prefers a 2-cell-or-larger size.
-      const needBig = !bigOnScreen
-
+      const countOf  = (kind) => kindCounts.get(kind) || 0
+      const isCapped = (kind) => countOf(kind) >= KIND_CAP
+      const isCappedFallback = (kind) =>
+        countOf(kind) >= (NEVER_DOUBLE.has(kind) ? KIND_CAP : KIND_CAP_FALLBACK)
       const deckNow = deckRef.current
       const now = Date.now()
 
@@ -205,34 +231,28 @@ export function useStageScheduler({ deck }) {
         return t && t > now
       }
 
-      // Pass 1 — strictest: not on screen, not same kind currently shown,
-      //                     not the kind we just showed, not recently evicted.
-      // Pass 2 — relax kind-hot rule (same kind allowed if cooled).
-      // Pass 3 — fallback: only "not on screen" + "not just evicted".
-      // Pass 4 — last resort: only "not currently on screen".
-      const baseFilter = (c) => !onScreenIds.has(c._id) && !isRecentlyEvicted(c._id) && !isCapped(c.kind)
+      // Pass 1 — strictest: kind not on screen, not the kind we just showed,
+      //          card not recently evicted.
+      // Pass 2 — relax the kind-hot rule.
+      // Pass 3 — relax the eviction cooldown (still one per kind).
+      // Pass 4 — only when the deck is kind-starved: allow a second of a kind.
+      const fresh = (c) => !onScreenIds.has(c._id) && !isRecentlyEvicted(c._id)
+      const kindStarved = new Set(deckNow.map(c => c.kind)).size < MAX_SLOTS
       const passes = [
-        deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind) && !isKindHot(c.kind)),
-        deckNow.filter(c => baseFilter(c) && !onScreenKinds.has(c.kind)),
-        deckNow.filter(c => baseFilter(c)),
+        deckNow.filter(c => fresh(c) && !isCapped(c.kind) && !isKindHot(c.kind)),
+        deckNow.filter(c => fresh(c) && !isCapped(c.kind)),
         deckNow.filter(c => !onScreenIds.has(c._id) && !isCapped(c.kind)),
+        kindStarved ? deckNow.filter(c => fresh(c) && !isCappedFallback(c.kind)) : [],
       ]
 
       for (const pool of passes) {
-        for (const card of shuffle(pool)) {
+        for (const card of weightedByKind(pool)) {
           const skip = skipUntilRef.current.get(card._id)
           if (skip && skip > now) continue
 
-          // When stage needs a big card, sort sizes by area descending — and
-          // randomize equal-area ties so 2x1 vs 1x2 split roughly evenly
-          // (otherwise insertion order always wins and we never see tall cards).
-          const baseSizes = SIZE_PREFS[card.kind] || [[1,1]]
-          const sizes = needBig
-            ? [...baseSizes].sort((a, b) => {
-                const diff = (b[0] * b[1]) - (a[0] * a[1])
-                return diff !== 0 ? diff : (Math.random() < 0.5 ? -1 : 1)
-              })
-            : baseSizes
+          // Shuffled so wide, tall and 2×2 all get airtime — a fixed order
+          // would let the first size that fits win every time.
+          const sizes = shuffle(SIZE_PREFS[card.kind] || DEFAULT_SIZES)
           let placed = false
           for (const [w, h] of sizes) {
             const rects = findFreeRects(occ, w, h)

@@ -1,19 +1,30 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import Background  from './components/Background.jsx'
 import HeaderBar   from './components/HeaderBar.jsx'
 import Stage       from './components/Stage.jsx'
 import Ticker      from './components/Ticker.jsx'
-import { useStageScheduler, buildDeck } from './hooks/useStageScheduler.js'
+import HalloweenOverlay from './components/HalloweenOverlay.jsx'
+import { buildDeck }        from './hooks/useStageScheduler.js'
 import { useWeather }       from './hooks/useWeather.js'
 import { useNews }          from './hooks/useNews.js'
 import { useFeeds }         from './hooks/useFeeds.js'
 import { useFieldNotes }    from './hooks/useFieldNotes.js'
 import { useNightlyReload } from './hooks/useNightlyReload.js'
-// Quotes + curated YouTube list are author-controlled mock content.
-// Field notes and BambooHR data come from live feeds only — never fall back
-// to invented examples, or the kitchen TV would show fake people/events.
-import { youtubeFeeds, quotes, movieQuotes } from './data/mock.js'
+// Quotes are author-controlled mock content. Field notes and BambooHR data
+// come from live feeds only — never fall back to invented examples, or the
+// kitchen TV would show fake people/events.
+//
+// Videos are paused: import `youtubeFeeds` from mock.js and add it back to
+// buildDeck() below to bring the YouTube card back.
+import { quotes, movieQuotes } from './data/mock.js'
 import { FAKE_HEADLINES } from './data/headlines.js'
+import { halloweenCards, spookyQuotes, spookyMovieQuotes, SPOOKY_HEADLINES } from './data/halloween.js'
+import { activeTheme, msUntilThemeEnds, loadThemeFonts } from './utils/theme.js'
+
+// Decided once per page load. The TV reloads every morning (and at the end
+// of a themed window), which is when a new theme takes effect.
+const THEME = activeTheme()
+const HALLOWEEN = THEME === 'halloween'
 
 function shuffle(arr) {
   const a = arr.slice()
@@ -84,6 +95,15 @@ export default function App() {
   // first cycles to this page, so this is a belt-and-suspenders guard.)
   useNightlyReload({ hour: 7, minute: 30 })
 
+  // Drop back to the normal look exactly when the themed window ends.
+  useEffect(() => {
+    loadThemeFonts(THEME)
+    const ms = msUntilThemeEnds(THEME)
+    if (ms == null || ms > 2 ** 31 - 1) return
+    const id = setTimeout(() => window.location.reload(), Math.max(ms, 0))
+    return () => clearTimeout(id)
+  }, [])
+
   const weather     = useWeather()
   const news        = useNews()
   const liveFeeds   = useFeeds()       // refreshes hourly from /api/feeds
@@ -103,24 +123,23 @@ export default function App() {
     whosOut,
     fieldNotes,
     news,
-    youtubeFeeds,
-    quotes,
-    movieQuotes,
+    quotes:      HALLOWEEN ? spookyQuotes      : quotes,
+    movieQuotes: HALLOWEEN ? spookyMovieQuotes : movieQuotes,
+    extras:      HALLOWEEN ? halloweenCards    : [],
     weatherCard: weather ? { kind: 'weather', ...weather } : null,
   }), [birthdays, anniversaries, holidays, whosOut, fieldNotes, news, weather])
 
-  const placements = useStageScheduler({ deck })
-
   // Ticker is fake-headlines only now. Shuffled once per page load so the
   // sequence varies day-to-day without changing the marquee mid-stream.
-  const tickerItems = useMemo(() => shuffle(FAKE_HEADLINES), [])
+  const tickerItems = useMemo(() => shuffle(HALLOWEEN ? SPOOKY_HEADLINES : FAKE_HEADLINES), [])
 
   return (
     <div className="flex h-screen w-screen flex-col">
-      <Background />
+      <Background theme={THEME} />
       <HeaderBar weather={weather} />
-      <Stage placements={placements} />
-      <Ticker items={tickerItems} />
+      <Stage deck={deck} />
+      <Ticker items={tickerItems} label={HALLOWEEN ? 'LIVE · HAUNTED KITCHEN' : 'LIVE · KITCHEN FEED'} />
+      {HALLOWEEN && <HalloweenOverlay />}
     </div>
   )
 }

@@ -9,6 +9,7 @@ export default {
         'display':  ['"Bebas Neue"', '"Barlow Condensed"', 'sans-serif'],
         'mono':     ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
         'body':     ['"Barlow"', 'system-ui', 'sans-serif'],
+        'spooky':   ['"Creepster"', '"Bebas Neue"', 'sans-serif'],  // loaded only during Halloween
       },
       colors: {
         'sc-navy':       '#001a3d',

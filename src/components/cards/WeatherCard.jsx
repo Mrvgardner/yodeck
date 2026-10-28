@@ -12,9 +12,10 @@ function glyphFor(code) {
   if (code >= 95)   return '⚡'
   return '·'
 }
+// One shared formatter — toLocaleTimeString builds a new Intl formatter per call.
+const HOUR_FMT = new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: true })
 function formatHour(iso) {
-  const d = new Date(iso)
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }).replace(/\s/, ' ')
+  return HOUR_FMT.format(new Date(iso)).replace(/\s/, ' ')
 }
 function summaryFor(hourly) {
   if (!hourly || hourly.length === 0) return ''
@@ -40,6 +41,8 @@ export default function WeatherCard({ data, size }) {
   const scale  = scaleOf(size)
   const hourly = Array.isArray(data.hourly) ? data.hourly : []
   const summary = summaryFor(hourly)
+  // Tall (1×2) cards stack the six hours as a 2×3 grid instead of a strip.
+  const tall = (size?.h || 1) > (size?.w || 1)
 
   return (
     <Card surface="storm">
@@ -54,7 +57,7 @@ export default function WeatherCard({ data, size }) {
         </header>
 
         <main className="flex-1 min-h-0 overflow-hidden">
-          <div className="grid grid-cols-6 gap-2 h-full">
+          <div className={`grid gap-2 h-full ${tall ? 'grid-cols-2 grid-rows-3' : 'grid-cols-6'}`}>
             {hourly.map((h, i) => (
               <div
                 key={h.time + i}

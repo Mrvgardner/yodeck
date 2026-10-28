@@ -1,10 +1,12 @@
+import { memo } from 'react'
+
 // Bottom ticker — endless horizontal marquee that scrolls UNDER the orange
 // "LIVE · KITCHEN FEED" badge. The badge is z-10 and the marquee is z-0 so
 // the text visibly slides behind the badge.
 //
 // To keep the loop seamless, items are duplicated and the track translates
 // from 0% → -50% (animation in index.css).
-export default function Ticker({ items }) {
+function Ticker({ items, label = 'LIVE · KITCHEN FEED' }) {
   if (!items || items.length === 0) return null
   const trackItems = [...items, ...items]
 
@@ -36,8 +38,11 @@ export default function Ticker({ items }) {
           aria-hidden
           style={{ background: 'white', boxShadow: '0 0 12px white' }}
         />
-        <span className="font-sc-bold text-2xl text-white whitespace-nowrap">LIVE · KITCHEN FEED</span>
+        <span className="font-sc-bold text-2xl text-white whitespace-nowrap">{label}</span>
       </div>
     </footer>
   )
 }
+
+// Memo: the marquee only needs to render once per page load.
+export default memo(Ticker)

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 
 // The rain choreography — translate + opacity only.
 // Rotation and scale force non-axis-aligned compositing every frame; on the
@@ -24,17 +24,21 @@ const dropIn = {
   },
 }
 
+const SURFACE_CLASS = {
+  glass:  'card-surface text-sc-cream',
+  amber:  'card-surface-amber text-white',
+  cream:  'card-surface-cream text-sc-navy',
+  storm:  'card-surface-storm text-sc-cream',
+  cinema: 'card-surface-cinema text-sc-cream',
+  haunt:  'card-surface-haunt text-sc-cream',
+}
+
+// Uses `m` (not `motion`) — must render inside the LazyMotion provider in Stage.
 export default function Card({ children, className = '', surface = 'glass', padding = 'p-14' }) {
-  const surfaceClass = {
-    glass:  'card-surface text-sc-cream',
-    amber:  'card-surface-amber text-white',
-    cream:  'card-surface-cream text-sc-navy',
-    storm:  'card-surface-storm text-sc-cream',
-    cinema: 'card-surface-cinema text-sc-cream',
-  }[surface] || 'card-surface text-sc-cream'
+  const surfaceClass = SURFACE_CLASS[surface] || SURFACE_CLASS.glass
 
   return (
-    <motion.div
+    <m.div
       variants={dropIn}
       initial="initial"
       animate="animate"
@@ -42,6 +46,6 @@ export default function Card({ children, className = '', surface = 'glass', padd
       className={`absolute inset-0 rounded-[28px] overflow-hidden ${surfaceClass} ${padding} ${className}`}
     >
       {children}
-    </motion.div>
+    </m.div>
   )
 }

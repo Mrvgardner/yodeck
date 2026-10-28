@@ -72,14 +72,15 @@ const SFW_BLOCKLIST = [
   'cannabis', 'marijuana', 'cocaine', 'heroin', 'fentanyl',
 ]
 
+// Compiled once into a single alternation — word boundary so "die" doesn't
+// trip on "diet" but does trip on "died".
+const SFW_RE = new RegExp(
+  `\\b(?:${SFW_BLOCKLIST.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`,
+  'i'
+)
+
 function isSafe(title, description) {
-  const hay = (title + ' ' + description).toLowerCase()
-  for (const word of SFW_BLOCKLIST) {
-    // word boundary so "die" doesn't trip on "diet" but does trip on "died"
-    const re = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-    if (re.test(hay)) return false
-  }
-  return true
+  return !SFW_RE.test(title + ' ' + description)
 }
 
 function parseFeed(xml) {
