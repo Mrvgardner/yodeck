@@ -26,6 +26,7 @@ const DWELL = {
   movie:       33_000,   // 25s hidden quote + ~8s reveal window
   halloween:   30_000,
   thanksgiving: 30_000,
+  christmas:   30_000,
   highlights:  60_000,   // fallback — the card normally sets its own dwellMs
 }
 
@@ -53,6 +54,7 @@ const KIND_WEIGHT = {
   weather:     3,
   halloween:   2,
   thanksgiving: 2,
+  christmas:   2,
   highlights:  4,
   youtube:     2,
   quote:       1,
@@ -75,6 +77,7 @@ const SIZE_PREFS = {
   movie:       [[2,1], [1,2], [2,2]],
   halloween:   [[2,1], [1,2], [2,2]],
   thanksgiving: [[2,1], [1,2], [2,2]],
+  christmas:   [[2,1], [1,2], [2,2]],
   highlights:  [[1,2], [2,2]],   // scrolling list needs height; 2×1 is a slit
 }
 const DEFAULT_SIZES = [[2,1], [1,2]]
@@ -176,7 +179,8 @@ function identityFor(card) {
     case 'movie':       return `${card.kind}:${card.text}`
     case 'weather':     return `${card.kind}:${card.location}`
     case 'halloween':
-    case 'thanksgiving': return `${card.kind}:${card.tagline}`
+    case 'thanksgiving':
+    case 'christmas':   return `${card.kind}:${card.tagline}`
     case 'highlights':  return `${card.kind}:${card.id}`
     default:            return `${card.kind}:${JSON.stringify(card)}`
   }

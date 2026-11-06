@@ -149,3 +149,27 @@ export function TurkeyIcon({ className = '' }) {
     </svg>
   )
 }
+
+// ─── Christmas ─────────────────────────────────────────────────────
+// Decorated tree for the Christmas countdown card.
+export function TreeIcon({ className = '' }) {
+  const ornaments = [
+    [42, 46, '#e03131'], [60, 54, '#ffd43b'], [36, 66, '#4dabf7'],
+    [56, 72, '#e03131'], [70, 80, '#ffd43b'], [30, 82, '#e03131'], [48, 86, '#4dabf7'],
+  ]
+  return (
+    <svg className={className} width="0.9em" height="1em" viewBox="0 0 90 100" aria-hidden>
+      {/* star */}
+      <path d="M45,2 L49,12 L60,12 L51,18 L55,29 L45,22 L35,29 L39,18 L30,12 L41,12 Z" fill="#ffd43b" />
+      {/* three tiers */}
+      <path d="M45,20 L66,48 L24,48 Z"  fill="#2b8a3e" />
+      <path d="M45,34 L74,70 L16,70 Z"  fill="#2f9e44" />
+      <path d="M45,50 L82,92 L8,92 Z"   fill="#37b24d" />
+      {/* garland */}
+      <path d="M28,58 Q45,66 64,56 M20,80 Q45,90 72,78" stroke="#fff3bf" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {ornaments.map(([x, y, c], i) => <circle key={i} cx={x} cy={y} r="3.6" fill={c} />)}
+      {/* trunk */}
+      <rect x="39" y="91" width="12" height="9" rx="1.5" fill="#7a4a2a" />
+    </svg>
+  )
+}

@@ -5,6 +5,7 @@ import Stage       from './components/Stage.jsx'
 import Ticker      from './components/Ticker.jsx'
 import HalloweenOverlay from './components/HalloweenOverlay.jsx'
 import FallOverlay      from './components/FallOverlay.jsx'
+import ChristmasOverlay from './components/ChristmasOverlay.jsx'
 import { buildDeck }        from './hooks/useStageScheduler.js'
 import { useWeather }       from './hooks/useWeather.js'
 import { useNews }          from './hooks/useNews.js'
@@ -21,6 +22,7 @@ import { quotes, movieQuotes } from './data/mock.js'
 import { FAKE_HEADLINES } from './data/headlines.js'
 import { halloweenCards, spookyQuotes, spookyMovieQuotes, SPOOKY_HEADLINES } from './data/halloween.js'
 import { thanksgivingCards, fallQuotes, FALL_HEADLINES } from './data/fall.js'
+import { christmasCards, holidayQuotes, christmasMovieQuotes, HOLIDAY_HEADLINES } from './data/christmas.js'
 import { activeTheme, msUntilThemeEnds, loadThemeFonts } from './utils/theme.js'
 
 // Decided once per page load. The TV reloads every morning (and at the end
@@ -28,8 +30,9 @@ import { activeTheme, msUntilThemeEnds, loadThemeFonts } from './utils/theme.js'
 const THEME = activeTheme()
 
 // What each theme swaps in. Halloween replaces the regular content outright;
-// fall runs for four weeks, so its content is mixed in with the regular sets
-// to keep variety up.
+// fall and Christmas run for weeks, so their content is mixed in with the
+// regular sets to keep variety up. Every other card (field notes, shout-outs,
+// news, weather, BambooHR) stays in rotation under every theme.
 const THEME_CONTENT = {
   normal: {
     quotes, movieQuotes, extras: [], headlines: FAKE_HEADLINES,
@@ -42,6 +45,11 @@ const THEME_CONTENT = {
   fall: {
     quotes: [...fallQuotes, ...quotes], movieQuotes, extras: thanksgivingCards, headlines: [...FALL_HEADLINES, ...FAKE_HEADLINES],
     tickerLabel: 'LIVE · HARVEST KITCHEN', Overlay: FallOverlay,
+  },
+  christmas: {
+    quotes: [...holidayQuotes, ...quotes], movieQuotes: [...christmasMovieQuotes, ...movieQuotes],
+    extras: christmasCards, headlines: [...HOLIDAY_HEADLINES, ...FAKE_HEADLINES],
+    tickerLabel: 'LIVE · HOLIDAY KITCHEN', Overlay: ChristmasOverlay,
   },
 }
 const CONTENT = THEME_CONTENT[THEME] || THEME_CONTENT.normal

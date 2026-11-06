@@ -115,24 +115,23 @@ function Gust({ g }) {
 }
 
 const MAX_FALLING = 4
+let leafSeq = 0   // unique ids for falling leaves and gusts
 
 function FallOverlay() {
   const [leaves, setLeaves] = useState([])
   const [gust, setGust]     = useState(null)
 
   // Drifting leaves: add one every 4–9s (up to MAX_FALLING), each removes
-  // itself when its fall finishes.
+  // itself when its fall finishes. The leaf and its removal timer are made
+  // outside the state updater (updaters must stay pure), and ids come from a
+  // module-level counter so they stay unique even if the effect re-runs.
   useEffect(() => {
-    let seq = 0
     const timers = new Set()
     const later = (fn, ms) => { const t = setTimeout(() => { timers.delete(t); fn() }, ms); timers.add(t) }
     const spawn = () => {
-      setLeaves(cur => {
-        if (cur.length >= MAX_FALLING) return cur
-        const l = makeLeaf(++seq)
-        later(() => setLeaves(c => c.filter(x => x.id !== l.id)), l.life)
-        return [...cur, l]
-      })
+      const l = makeLeaf(++leafSeq)
+      setLeaves(cur => (cur.length >= MAX_FALLING ? cur : [...cur, l]))
+      later(() => setLeaves(c => c.filter(x => x.id !== l.id)), l.life)
       later(spawn, rand(4_000, 9_000))
     }
     later(spawn, 1_500)
@@ -141,9 +140,9 @@ function FallOverlay() {
 
   // Gusts: one every 40–75s; the first shows up quickly so it's obvious.
   useEffect(() => {
-    let id, seq = 0
+    let id
     const blow = () => {
-      const g = makeGust(++seq)
+      const g = makeGust(++leafSeq)
       setGust(g)
       id = setTimeout(() => {
         setGust(null)
