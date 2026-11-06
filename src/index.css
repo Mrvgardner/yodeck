@@ -245,6 +245,22 @@
 .hw-legs-fast { animation-duration: 0.12s; }
 .hw-legs-b    { animation-direction: alternate-reverse; }
 
+/* Shout-outs card (HighlightsCard.jsx): the list is rendered twice and moved
+   up by half, so the loop is seamless. Duration is set inline from the
+   measured height so the speed stays constant. */
+@keyframes highlightsScroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+.highlights-scroll {
+  animation: highlightsScroll 60s linear infinite;
+  will-change: transform;
+}
+.highlights-window {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%);
+}
+
 /* Edge fade masks so cards visually disappear at frame edges */
 .stage-mask {
   -webkit-mask-image: linear-gradient(

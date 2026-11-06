@@ -54,9 +54,13 @@ export default async function handler() {
       })
     }
     const raw = await res.json()
+    const all = Array.isArray(raw) ? raw : []
+    // Weekly recognition digests ("This Week's Highlights") get their own
+    // card on the TV, so they're split out of the regular notes.
+    const isHighlights = n => n && n.kind === 'highlights' && Array.isArray(n.highlights)
     // Normalize to the shape Yodeck's FieldNoteCard expects.
     // Pull out a few of the most recent (newest first — SCC already sorts that way).
-    const notes = (Array.isArray(raw) ? raw : []).slice(0, 12).map(n => ({
+    const notes = all.filter(n => !isHighlights(n)).slice(0, 12).map(n => ({
       kind:      'fieldnote',
       id:        n.id,
       title:     n.title,
@@ -65,7 +69,8 @@ export default async function handler() {
       timestamp: relativeTimestamp(n.date),
       date:      n.date,
     }))
-    return new Response(JSON.stringify({ notes, fetchedAt: new Date().toISOString() }), {
+    const highlights = latestHighlights(all.filter(isHighlights))
+    return new Response(JSON.stringify({ notes, highlights, fetchedAt: new Date().toISOString() }), {
       status: 200, headers: jsonCors(),
     })
   } catch (err) {
@@ -73,6 +78,28 @@ export default async function handler() {
       status: 200, headers: jsonCors(),
     })
   }
+}
+
+// Most recent highlights week, if it's from the last three weeks — older
+// shout-outs are stale on a kitchen TV. Only the fields the card shows.
+const HIGHLIGHTS_MAX_AGE_DAYS = 21
+function latestHighlights(weeks) {
+  const latest = [...weeks].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))[0]
+  if (!latest) return null
+  const age = (Date.now() - new Date(latest.date + 'T12:00:00').getTime()) / (1000 * 60 * 60 * 24)
+  if (!(age <= HIGHLIGHTS_MAX_AGE_DAYS)) return null
+  const str = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max)
+  const items = latest.highlights
+    .map(h => ({
+      recipients: (Array.isArray(h.recipients) ? h.recipients : []).map(r => str(r, 60)).filter(Boolean),
+      others:     Number.isFinite(h.others) ? h.others : 0,
+      from:       str(h.from, 60),
+      badge:      str(h.badge, 40),
+      message:    str(h.message, 280),
+    }))
+    .filter(h => h.recipients.length > 0 || h.others > 0)
+  if (items.length === 0) return null
+  return { id: latest.id || `highlights-${latest.date}`, date: latest.date, items }
 }
 
 function relativeTimestamp(isoDate) {

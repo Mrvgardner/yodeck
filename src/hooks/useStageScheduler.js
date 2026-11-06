@@ -25,6 +25,7 @@ const DWELL = {
   quote:       30_000,
   movie:       33_000,   // 25s hidden quote + ~8s reveal window
   halloween:   30_000,
+  highlights:  60_000,   // fallback — the card normally sets its own dwellMs
 }
 
 // Variety rule: one card per kind on screen. The stage only holds 2–4 cards,
@@ -50,6 +51,7 @@ const KIND_WEIGHT = {
   news:        3,
   weather:     3,
   halloween:   2,
+  highlights:  4,
   youtube:     2,
   quote:       1,
   movie:       1,
@@ -70,6 +72,7 @@ const SIZE_PREFS = {
   quote:       [[2,1], [1,2], [2,2]],
   movie:       [[2,1], [1,2], [2,2]],
   halloween:   [[2,1], [1,2], [2,2]],
+  highlights:  [[1,2], [2,2]],   // scrolling list needs height; 2×1 is a slit
 }
 const DEFAULT_SIZES = [[2,1], [1,2]]
 
@@ -170,6 +173,7 @@ function identityFor(card) {
     case 'movie':       return `${card.kind}:${card.text}`
     case 'weather':     return `${card.kind}:${card.location}`
     case 'halloween':   return `${card.kind}:${card.tagline}`
+    case 'highlights':  return `${card.kind}:${card.id}`
     default:            return `${card.kind}:${JSON.stringify(card)}`
   }
 }
@@ -290,7 +294,7 @@ export function useStageScheduler({ deck }) {
 
             const rect = rects[0]
             const id = `p${++placementSeq.current}`
-            const dwell  = DWELL[card.kind] ?? 22_000
+            const dwell  = card.dwellMs ?? DWELL[card.kind] ?? 22_000
             const jitter = 0.85 + Math.random() * 0.3
             const expiresAt = now + dwell * jitter
 

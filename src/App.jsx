@@ -109,12 +109,22 @@ export default function App() {
   const liveFeeds   = useFeeds()       // refreshes hourly from /api/feeds
   // Field notes are live-only — if the feed fails or is empty, we show
   // nothing rather than invented placeholder posts.
-  const fieldNotes  = useFieldNotes()  // refreshes every 10 min from /api/field-notes
+  const { notes: fieldNotes, highlights } = useFieldNotes()  // refreshes every 10 min from /api/field-notes
 
   const birthdays     = useMemo(() => celebrationsInWindow(liveFeeds.birthdays, 7),                     [liveFeeds.birthdays])
   const anniversaries = useMemo(() => withYears(celebrationsInWindow(liveFeeds.anniversaries, 7)),      [liveFeeds.anniversaries])
   const holidays      = useMemo(() => upcomingHolidays(liveFeeds.holidays, 45),                         [liveFeeds.holidays])
   const whosOut       = useMemo(() => currentlyOrSoonOut(liveFeeds.whosOut, 5),                         [liveFeeds.whosOut])
+
+  // This week's shout-outs as a single card that scrolls through them all.
+  // It stays up long enough for roughly one full pass of the list.
+  const highlightsCard = useMemo(() => highlights && {
+    kind:    'highlights',
+    id:      highlights.id,
+    date:    highlights.date,
+    items:   highlights.items,
+    dwellMs: Math.min(120_000, Math.max(45_000, highlights.items.length * 8_000)),
+  }, [highlights])
 
   const deck = useMemo(() => buildDeck({
     birthdays,
@@ -125,9 +135,9 @@ export default function App() {
     news,
     quotes:      HALLOWEEN ? spookyQuotes      : quotes,
     movieQuotes: HALLOWEEN ? spookyMovieQuotes : movieQuotes,
-    extras:      HALLOWEEN ? halloweenCards    : [],
+    extras:      [...(HALLOWEEN ? halloweenCards : []), ...(highlightsCard ? [highlightsCard] : [])],
     weatherCard: weather ? { kind: 'weather', ...weather } : null,
-  }), [birthdays, anniversaries, holidays, whosOut, fieldNotes, news, weather])
+  }), [birthdays, anniversaries, holidays, whosOut, fieldNotes, highlightsCard, news, weather])
 
   // Ticker is fake-headlines only now. Shuffled once per page load so the
   // sequence varies day-to-day without changing the marquee mid-stream.

@@ -11,6 +11,7 @@ import QuoteCard       from './cards/QuoteCard.jsx'
 import WhosOutCard     from './cards/WhosOutCard.jsx'
 import MovieQuoteCard  from './cards/MovieQuoteCard.jsx'
 import HalloweenCard   from './cards/HalloweenCard.jsx'
+import HighlightsCard  from './cards/HighlightsCard.jsx'
 import { COLS, ROWS, useStageScheduler } from '../hooks/useStageScheduler.js'
 
 // Memoized so a card never re-renders unless its data identity actually changes.
@@ -35,6 +36,7 @@ const CardFor = memo(function CardFor({ card, w, h }) {
     case 'whosout':     return <WhosOutCard     data={card} size={size} />
     case 'movie':       return <MovieQuoteCard  data={card} size={size} />
     case 'halloween':   return <HalloweenCard   data={card} size={size} />
+    case 'highlights':  return <HighlightsCard  data={card} size={size} />
     default:            return null
   }
 })
