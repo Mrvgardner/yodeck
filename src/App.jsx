@@ -4,6 +4,7 @@ import HeaderBar   from './components/HeaderBar.jsx'
 import Stage       from './components/Stage.jsx'
 import Ticker      from './components/Ticker.jsx'
 import HalloweenOverlay from './components/HalloweenOverlay.jsx'
+import FallOverlay      from './components/FallOverlay.jsx'
 import { buildDeck }        from './hooks/useStageScheduler.js'
 import { useWeather }       from './hooks/useWeather.js'
 import { useNews }          from './hooks/useNews.js'
@@ -19,12 +20,31 @@ import { useNightlyReload } from './hooks/useNightlyReload.js'
 import { quotes, movieQuotes } from './data/mock.js'
 import { FAKE_HEADLINES } from './data/headlines.js'
 import { halloweenCards, spookyQuotes, spookyMovieQuotes, SPOOKY_HEADLINES } from './data/halloween.js'
+import { thanksgivingCards, fallQuotes, FALL_HEADLINES } from './data/fall.js'
 import { activeTheme, msUntilThemeEnds, loadThemeFonts } from './utils/theme.js'
 
 // Decided once per page load. The TV reloads every morning (and at the end
 // of a themed window), which is when a new theme takes effect.
 const THEME = activeTheme()
-const HALLOWEEN = THEME === 'halloween'
+
+// What each theme swaps in. Halloween replaces the regular content outright;
+// fall runs for four weeks, so its content is mixed in with the regular sets
+// to keep variety up.
+const THEME_CONTENT = {
+  normal: {
+    quotes, movieQuotes, extras: [], headlines: FAKE_HEADLINES,
+    tickerLabel: 'LIVE · KITCHEN FEED', Overlay: null,
+  },
+  halloween: {
+    quotes: spookyQuotes, movieQuotes: spookyMovieQuotes, extras: halloweenCards, headlines: SPOOKY_HEADLINES,
+    tickerLabel: 'LIVE · HAUNTED KITCHEN', Overlay: HalloweenOverlay,
+  },
+  fall: {
+    quotes: [...fallQuotes, ...quotes], movieQuotes, extras: thanksgivingCards, headlines: [...FALL_HEADLINES, ...FAKE_HEADLINES],
+    tickerLabel: 'LIVE · HARVEST KITCHEN', Overlay: FallOverlay,
+  },
+}
+const CONTENT = THEME_CONTENT[THEME] || THEME_CONTENT.normal
 
 function shuffle(arr) {
   const a = arr.slice()
@@ -133,23 +153,24 @@ export default function App() {
     whosOut,
     fieldNotes,
     news,
-    quotes:      HALLOWEEN ? spookyQuotes      : quotes,
-    movieQuotes: HALLOWEEN ? spookyMovieQuotes : movieQuotes,
-    extras:      [...(HALLOWEEN ? halloweenCards : []), ...(highlightsCard ? [highlightsCard] : [])],
+    quotes:      CONTENT.quotes,
+    movieQuotes: CONTENT.movieQuotes,
+    extras:      [...CONTENT.extras, ...(highlightsCard ? [highlightsCard] : [])],
     weatherCard: weather ? { kind: 'weather', ...weather } : null,
   }), [birthdays, anniversaries, holidays, whosOut, fieldNotes, highlightsCard, news, weather])
 
   // Ticker is fake-headlines only now. Shuffled once per page load so the
   // sequence varies day-to-day without changing the marquee mid-stream.
-  const tickerItems = useMemo(() => shuffle(HALLOWEEN ? SPOOKY_HEADLINES : FAKE_HEADLINES), [])
+  const tickerItems = useMemo(() => shuffle(CONTENT.headlines), [])
+  const { Overlay } = CONTENT
 
   return (
     <div className="flex h-screen w-screen flex-col">
       <Background theme={THEME} />
       <HeaderBar weather={weather} />
       <Stage deck={deck} />
-      <Ticker items={tickerItems} label={HALLOWEEN ? 'LIVE · HAUNTED KITCHEN' : 'LIVE · KITCHEN FEED'} />
-      {HALLOWEEN && <HalloweenOverlay />}
+      <Ticker items={tickerItems} label={CONTENT.tickerLabel} />
+      {Overlay && <Overlay />}
     </div>
   )
 }

@@ -107,3 +107,45 @@ export function WeatherIcon({ code, className = '' }) {
     </svg>
   )
 }
+
+// ─── Fall ──────────────────────────────────────────────────────────
+// Two leaf shapes in a few autumn colors, used by FallOverlay.
+const MAPLE = 'M50,4 L57,24 L70,17 L66,37 L86,33 L77,48 L96,55 L72,62 L77,77 L58,69 L54,90 L50,88 L46,90 L42,69 L23,77 L28,62 L4,55 L23,48 L14,33 L34,37 L30,17 L43,24 Z'
+const OVAL  = 'M50,6 C78,24 86,58 50,92 C14,58 22,24 50,6 Z'
+
+export function LeafIcon({ shape = 'maple', color = '#e8590c', size = 48, className = '' }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 100 100" aria-hidden>
+      <path d={shape === 'maple' ? MAPLE : OVAL} fill={color} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* veins + stem */}
+      <path
+        d={shape === 'maple' ? 'M50,88 L50,30 M50,62 L30,50 M50,62 L70,50 M50,45 L36,30 M50,45 L64,30' : 'M50,92 L50,18 M50,60 L34,44 M50,60 L66,44 M50,42 L38,30 M50,42 L62,30'}
+        stroke="rgba(0,0,0,0.28)" strokeWidth="2.5" fill="none" strokeLinecap="round"
+      />
+      <path d="M50,88 L50,99" stroke="#6b3a1e" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+// Friendly turkey for the Thanksgiving countdown card.
+export function TurkeyIcon({ className = '' }) {
+  const feathers = ['#c92a2a', '#e8590c', '#f59f00', '#e8590c', '#c92a2a']
+  return (
+    <svg className={className} width="1.1em" height="1em" viewBox="0 0 110 100" aria-hidden>
+      {/* tail fan */}
+      {feathers.map((c, i) => {
+        const a = -70 + i * 35
+        return <ellipse key={i} cx="55" cy="30" rx="13" ry="30" fill={c} transform={`rotate(${a} 55 58)`} />
+      })}
+      {/* body + head */}
+      <ellipse cx="55" cy="66" rx="24" ry="26" fill="#7a4a2a" />
+      <circle cx="55" cy="40" r="13" fill="#8b5a36" />
+      <circle cx="50" cy="37" r="2.6" fill="#1a1a1a" />
+      <circle cx="60" cy="37" r="2.6" fill="#1a1a1a" />
+      <path d="M52,43 L58,43 L55,49 Z" fill="#f59f00" />
+      <path d="M57,46 C61,48 61,55 57,57 C55,53 55,49 57,46 Z" fill="#c92a2a" />
+      {/* feet */}
+      <path d="M46,91 L44,98 M46,91 L48,98 M64,91 L62,98 M64,91 L66,98" stroke="#f59f00" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+}

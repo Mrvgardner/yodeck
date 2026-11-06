@@ -31,6 +31,7 @@ const SURFACE_CLASS = {
   storm:  'card-surface-storm text-sc-cream',
   cinema: 'card-surface-cinema text-sc-cream',
   haunt:  'card-surface-haunt text-sc-cream',
+  harvest: 'card-surface-harvest text-sc-cream',
 }
 
 // Uses `m` (not `motion`) — must render inside the LazyMotion provider in Stage.

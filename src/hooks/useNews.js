@@ -8,6 +8,11 @@ export function useNews(refreshMs = 30 * 60 * 1000) {
 
   useEffect(() => {
     let cancelled = false
+    // Local preview only (?demo=all) — see data/devDemo.js. Stripped from production builds.
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'all') {
+      import('../data/devDemo.js').then(m => { if (!cancelled) setStories(m.demoNews) })
+      return () => { cancelled = true }
+    }
     async function load() {
       try {
         const res = await fetch('/api/news', { cache: 'no-cache' })

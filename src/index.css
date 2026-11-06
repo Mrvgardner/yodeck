@@ -140,6 +140,19 @@
     0 0 0 1px rgba(255, 122, 26, 0.35);
 }
 
+/* Harvest — Thanksgiving countdown card. Deep rust-brown with an amber rim. */
+.card-surface-harvest {
+  background: linear-gradient(
+    145deg,
+    rgb(110, 42, 14) 0%,
+    rgb(52, 20, 8) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 140, 0.18),
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 181, 71, 0.35);
+}
+
 /* Status pip — single soft glow (was double) for cheaper paint */
 .status-pip {
   display: inline-block;
@@ -259,6 +272,41 @@
 .highlights-window {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%);
           mask-image: linear-gradient(to bottom, transparent 0, #000 24px, #000 calc(100% - 32px), transparent 100%);
+}
+
+/* ─── Fall leaves (FallOverlay.jsx) ─────────────────────────────────
+   Transform-only animations so they stay on the compositor. */
+/* Leaves fall to the ground line (top of the 100px ticker), settle, and fade. */
+@keyframes flFall {
+  0%   { transform: translateY(-12vh); opacity: 1; }
+  88%  { transform: translateY(calc(100vh - 140px)); opacity: 1; }
+  100% { transform: translateY(calc(100vh - 140px)); opacity: 0; }
+}
+@keyframes flSway {
+  from { transform: translateX(-36px); }
+  to   { transform: translateX(36px); }
+}
+@keyframes flSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes flGust {
+  from { transform: translate(-10vw, 0); }
+  to   { transform: translate(112vw, 16vh); }
+}
+.fl-fall {
+  position: absolute;
+  top: 0;
+  animation: flFall 16s linear forwards;
+  will-change: transform;
+}
+.fl-sway { animation: flSway 3s ease-in-out infinite alternate; }
+.fl-spin { animation: flSpin 7s linear infinite; }
+.fl-gust {
+  position: absolute;
+  left: 0;
+  animation: flGust 6s ease-in-out both;
+  will-change: transform;
 }
 
 /* Edge fade masks so cards visually disappear at frame edges */

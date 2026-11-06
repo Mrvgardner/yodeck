@@ -11,10 +11,16 @@ export function useFieldNotes(refreshMs = 10 * 60 * 1000) {
 
   useEffect(() => {
     let cancelled = false
-    // Local preview only: the dev server has no /api proxy, so
-    // ?demo=highlights loads sample shout-outs. Stripped from production builds.
-    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'highlights') {
+    // Local preview only: the dev server has no /api proxy, so ?demo=highlights
+    // loads sample shout-outs and ?demo=all sample notes too. Stripped from
+    // production builds.
+    const demo = import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo')
+    if (demo === 'highlights') {
       import('../data/highlightsDemo.js').then(m => { if (!cancelled) setFeed({ notes: [], highlights: m.demoHighlights }) })
+      return () => { cancelled = true }
+    }
+    if (demo === 'all') {
+      import('../data/devDemo.js').then(m => { if (!cancelled) setFeed(m.demoFieldNotes) })
       return () => { cancelled = true }
     }
     async function load() {

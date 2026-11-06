@@ -14,6 +14,11 @@ export function useFeeds(refreshMs = 60 * 60 * 1000) {
 
   useEffect(() => {
     let cancelled = false
+    // Local preview only (?demo=all) — see data/devDemo.js. Stripped from production builds.
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'all') {
+      import('../data/devDemo.js').then(m => { if (!cancelled) setFeeds(m.demoFeeds) })
+      return () => { cancelled = true }
+    }
     async function load() {
       try {
         const res = await fetch('/api/feeds', { cache: 'no-cache' })

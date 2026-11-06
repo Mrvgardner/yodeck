@@ -1,12 +1,30 @@
-import { memo } from 'react'
+import { memo, useLayoutEffect, useRef, useState } from 'react'
 
 // Bottom ticker — endless horizontal marquee that scrolls UNDER the orange
 // "LIVE · KITCHEN FEED" badge. The badge is z-10 and the marquee is z-0 so
 // the text visibly slides behind the badge.
 //
 // To keep the loop seamless, items are duplicated and the track translates
-// from 0% → -50% (animation in index.css).
+// from 0% → -50% (animation in index.css). The duration is derived from the
+// measured width so the text moves at a constant reading speed no matter how
+// many headlines there are — a fixed duration made longer lists race.
+const PX_PER_SEC = 130
+
 function Ticker({ items, label = 'LIVE · KITCHEN FEED' }) {
+  const trackRef = useRef(null)
+  const [duration, setDuration] = useState(null)
+
+  // Re-measured on resize so the late-loading display font doesn't skew it.
+  useLayoutEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const measure = () => setDuration(track.scrollWidth / 2 / PX_PER_SEC)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(track)
+    return () => ro.disconnect()
+  }, [items])
+
   if (!items || items.length === 0) return null
   const trackItems = [...items, ...items]
 
@@ -14,7 +32,7 @@ function Ticker({ items, label = 'LIVE · KITCHEN FEED' }) {
     <footer className="relative h-[100px] border-t border-sc-cream/10 overflow-hidden bg-sc-navy-deep/60">
       {/* Marquee — fills full width, z-0 (default), runs continuously */}
       <div className="absolute inset-0 flex items-center">
-        <div className="ticker-track">
+        <div ref={trackRef} className="ticker-track" style={duration ? { animationDuration: `${duration}s` } : undefined}>
           {trackItems.map((it, i) => (
             <span key={i} className="font-display text-3xl text-sc-cream tracking-wide">
               <span className="text-sc-orange mx-16">◆</span>

@@ -1,12 +1,28 @@
 // Seasonal theme switch. Evaluated once per page load; App also schedules a
-// reload at the end of the window so the TV drops back to normal on its own.
+// reload at the end of the window so the TV moves on to the next look (or
+// back to normal) on its own.
 //
-// Preview any time with ?theme=halloween — or force it off with ?theme=none.
+// Preview any time with ?theme=halloween or ?theme=fall — or force the normal
+// look with ?theme=none.
 
-export const HALLOWEEN_WINDOW = {
-  start: new Date(2026, 9, 1),    // Oct 1, 2026 00:00 local
-  end:   new Date(2026, 10, 1),   // Nov 1, 2026 00:00 local (midnight)
+// Thanksgiving: the fourth Thursday of November.
+export function thanksgivingOf(year) {
+  const nov1 = new Date(year, 10, 1)
+  const firstThursday = 1 + ((4 - nov1.getDay() + 7) % 7)
+  return new Date(year, 10, firstThursday + 21)
 }
+
+// Windows are [start, end) in local time. Fall picks up the moment Halloween
+// ends and runs through Black Friday (midnight after Thanksgiving + 1).
+function windowsFor(year) {
+  const thanksgiving = thanksgivingOf(year)
+  return {
+    halloween: { start: new Date(year, 9, 1),  end: new Date(year, 10, 1) },
+    fall:      { start: new Date(year, 10, 1), end: new Date(year, 10, thanksgiving.getDate() + 2) },
+  }
+}
+
+export const THEMES = ['halloween', 'fall']
 
 function urlOverride() {
   try {
@@ -16,20 +32,20 @@ function urlOverride() {
   }
 }
 
-// Returns 'halloween' or null.
+// Returns a theme name from THEMES, or null for the normal look.
 export function activeTheme(now = new Date()) {
   const override = urlOverride()
-  if (override === 'halloween') return 'halloween'
-  if (override === 'none')      return null
-  const { start, end } = HALLOWEEN_WINDOW
-  return now >= start && now < end ? 'halloween' : null
+  if (THEMES.includes(override)) return override
+  if (override === 'none')       return null
+  const windows = windowsFor(now.getFullYear())
+  return THEMES.find(name => now >= windows[name].start && now < windows[name].end) ?? null
 }
 
 // ms until the scheduled theme should switch off, or null when there's
 // nothing to schedule (no theme, or forced on via the URL).
 export function msUntilThemeEnds(theme, now = new Date()) {
-  if (theme !== 'halloween' || urlOverride() === 'halloween') return null
-  return HALLOWEEN_WINDOW.end - now
+  if (!theme || urlOverride() === theme) return null
+  return windowsFor(now.getFullYear())[theme].end - now
 }
 
 // Creepster is only needed while the Halloween theme runs, so load it on
